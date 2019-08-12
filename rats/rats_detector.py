@@ -128,9 +128,9 @@ def open_audio(audio_bytes):
     image = Image \
         .fromarray(spectrogram) \
         .convert("RGB") \
-        .resize((256, 256))
+        .resize((299, 299))
 
-    print("Return!")
+
     return image
 
 

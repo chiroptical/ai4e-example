@@ -8,6 +8,7 @@ from io import BytesIO
 from os import getenv
 import uuid
 import sys
+import tensorflow as tf
 import numpy as np
 import rats_detector
 
@@ -58,10 +59,22 @@ def detect(*args, **kwargs):
 
     image = rats_detector.open_audio(audio_bytes)
 
-    print("runserver.py: detect(), rendering and saving result image...")
+    X = tf.keras.preprocessing.image.img_to_array(image)
+    X = np.expand_dims(X, axis=0)
+
+    print("Get Model!")
+    model = tf.keras.applications.inception_v3.InceptionV3()
+
+    preds = model.predict(X)
+
     print("runserver.py: detect() finished.")
 
-    return {"image_size": image.size}
+    scores = []
+    for outer in tf.keras.applications.inception_v3.decode_predictions(preds):
+        for _, cls, score in outer:
+            scores.append((cls, str(score)))
+
+    return {"predictions": scores}
 
 
 if __name__ == "__main__":
