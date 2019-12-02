@@ -37,7 +37,8 @@ RUN apt-get update && \
 
 # Install the Python packages needed
 RUN pip3 install --no-cache-dir \
-  tensorflow-gpu \
+  tensorflow-gpu==1.14.0 \
+  pandas \
   scipy \
   scikit-image \
   librosa \
@@ -65,22 +66,28 @@ COPY ./startup.sh /
 RUN chmod +x /startup.sh
 
 # Copy your API code
-COPY ./rats /app/rats
+COPY ./birds /app/birds
+
+# Copy the Model
+COPY ./model/model.h5 /app/birds
+
+# Copy the species metadata
+COPY ./birds/species.csv /app/birds/species.csv
 
 # Application Insights keys and trace configuration
 ENV APPINSIGHTS_INSTRUMENTATIONKEY= \
     TRACE_SAMPLING_RATE=1.0
 
 # The following variables will allow you to filter logs in AppInsights
-ENV SERVICE_OWNER=AI4E_Tensorflow_Rats \
+ENV SERVICE_OWNER=AI4E_Tensorflow_Birds \
     SERVICE_CLUSTER=Local\ Docker \
-    SERVICE_MODEL_NAME=AI4E_Tensorflow_Rats \
+    SERVICE_MODEL_NAME=AI4E_Tensorflow_Birds \
     SERVICE_MODEL_FRAMEWORK=Python \
     SERVICE_MODEL_FRAMEOWRK_VERSION=3.6.8 \
     SERVICE_MODEL_FRAMEWORK_VERSION=3.6.8 \
     SERVICE_MODEL_VERSION=1.0
 
-ENV API_PREFIX=/v1/rats
+ENV API_PREFIX=/v1/birds
 
 ENV STORAGE_ACCOUNT_NAME= \
     STORAGE_ACCOUNT_KEY=

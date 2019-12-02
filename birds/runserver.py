@@ -9,8 +9,9 @@ from os import getenv
 import uuid
 import sys
 import tensorflow as tf
+import pandas as pd
 import numpy as np
-import rats_detector
+import birds_detector
 
 print("Creating Application")
 
@@ -26,10 +27,10 @@ log = AI4EAppInsights()
 with app.app_context():
     ai4e_service = APIService(app, log)
 
-# Load the model
+# Load the model and species dataframe
 # The model was copied to this location when the container was built; see ../Dockerfile
-#model_path = "/app/rats/frozen_inference_graph.pb"
-#detection_graph = rats_detector.load_model(model_path)
+model = tf.keras.models.load_model("/app/birds/model.h5")
+species = pd.read_csv("/app/birds/species.csv")
 
 # Define a function for processing request data, if appliciable.  This function loads data or files into
 # a dictionary for access in your API function.  We pass this function as a parameter to your API setup.
@@ -54,27 +55,24 @@ def process_request_data(request):
     trace_name="post:detect",
 )
 def detect(*args, **kwargs):
-    print("runserver.py: detect() called, generating detections...")
+    print("runserver.py: detect() called")
     audio_bytes = kwargs.get("audio_bytes")
 
-    image = rats_detector.open_audio(audio_bytes)
+    print("runserver.py: detect(), opening audio")
+    image = birds_detector.open_audio(audio_bytes)
 
     X = tf.keras.preprocessing.image.img_to_array(image)
     X = np.expand_dims(X, axis=0)
 
-    print("Get Model!")
-    model = tf.keras.applications.inception_v3.InceptionV3()
-
+    print("runserver.py: detect(), predict")
     preds = model.predict(X)
 
-    print("runserver.py: detect() finished.")
+    print("runserver.py: detect(), generate scores")
+    for cls, score in zip(preds[0], species["species"].values):
+        print(f"{cls}: {score:.3f}")
 
-    scores = []
-    for outer in tf.keras.applications.inception_v3.decode_predictions(preds):
-        for _, cls, score in outer:
-            scores.append((cls, str(score)))
-
-    return {"predictions": scores}
+    print("runserver.py: detect(), return predictions")
+    return {"predictions": ""}
 
 
 if __name__ == "__main__":
