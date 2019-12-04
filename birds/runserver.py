@@ -35,10 +35,10 @@ species = pd.read_csv("/app/birds/species.csv")
 # Define a function for processing request data, if appliciable.  This function loads data or files into
 # a dictionary for access in your API function.  We pass this function as a parameter to your API setup.
 def process_request_data(request):
-    return_values = {"audio_bytes": None}
+    return_values = {"audio_io": None}
     try:
         # Attempt to load the body
-        return_values["audio_bytes"] = BytesIO(request.data)
+        return_values["audio_io"] = BytesIO(request.data)
     except:
         log.log_error("Unable to load the request data")  # Log to Application Insights
     return return_values
@@ -56,12 +56,13 @@ def process_request_data(request):
 )
 def detect(*args, **kwargs):
     print("runserver.py: detect() called")
-    audio_bytes = kwargs.get("audio_bytes")
+    audio_io = kwargs.get("audio_io")
 
     print("runserver.py: detect(), opening audio")
-    image = birds_detector.open_audio(audio_bytes)
+    image = birds_detector.open_audio(audio_io)
 
-    X = tf.keras.preprocessing.image.img_to_array(image)
+    # Need to normalize in (0., 1.)
+    X = tf.keras.preprocessing.image.img_to_array(image) / 255.
     X = np.expand_dims(X, axis=0)
 
     print("runserver.py: detect(), predict")
