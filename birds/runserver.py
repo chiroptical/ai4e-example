@@ -68,11 +68,12 @@ def detect(*args, **kwargs):
     preds = model.predict(X)
 
     print("runserver.py: detect(), generate scores")
-    for cls, score in zip(preds[0], species["species"].values):
-        print(f"{cls}: {score:.3f}")
+    scores = [None] * species.shape[0]
+    for idx, (cls, score) in enumerate(zip(species["species"].values, preds[0])):
+        scores[idx] = f"{cls}: {score:.3f}"
 
     print("runserver.py: detect(), return predictions")
-    return {"predictions": ""}
+    return {"predictions": scores}
 
 
 if __name__ == "__main__":
