@@ -8,3 +8,10 @@ with open("client/cardinalis-cardinalis.wav", "rb") as audio:
 r = requests.post("http://localhost:8081/v1/birds/detect", data=audio_bytes)
 
 print(r.text)
+
+with open("client/double-cc.wav", "rb") as audio:
+    audio_bytes = audio.read()
+
+r = requests.post("http://localhost:8081/v1/birds/detect", data=audio_bytes)
+
+print(r.text)

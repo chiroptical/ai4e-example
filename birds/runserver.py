@@ -59,19 +59,16 @@ def detect(*args, **kwargs):
     audio_io = kwargs.get("audio_io")
 
     print("runserver.py: detect(), opening audio")
-    image = birds_detector.open_audio(audio_io)
-
-    # Need to normalize in (0., 1.)
-    X = tf.keras.preprocessing.image.img_to_array(image) / 255.
-    X = np.expand_dims(X, axis=0)
+    _, images = birds_detector.open_audio(audio_io)
 
     print("runserver.py: detect(), predict")
-    preds = model.predict(X)
+    preds = model.predict(images)
 
     print("runserver.py: detect(), generate scores")
-    scores = [None] * species.shape[0]
-    for idx, (cls, score) in enumerate(zip(species["species"].values, preds[0])):
-        scores[idx] = f"{cls}: {score:.3f}"
+    scores = [[None] * species.shape[0] for _ in range(preds.shape[0])]
+    for p_idx, pred in enumerate(preds):
+        for idx, (cls, score) in enumerate(zip(species["species"].values, pred)):
+            scores[p_idx][idx] = f"{cls}: {score:.5f}"
 
     print("runserver.py: detect(), return predictions")
     return {"predictions": scores}

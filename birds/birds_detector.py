@@ -94,14 +94,42 @@ def open_audio(audio_bytes):
         audio_bytes,
     )
 
-    # Generate the spectrogram
-    spectrogram = samples_to_spec(samples, input_sample_rate)
+    # Compute duration
+    frames = len(samples)
+    duration = frames / input_sample_rate
 
-    
-    # Generate an image and resize it
-    image = Image \
-        .fromarray(spectrogram) \
-        .convert("RGB") \
-        .resize((299, 299))
+    # Split if necessary
+    samples_needed = 5 * input_sample_rate
+    start = 0
+    starts = []
+    stop = samples_needed
+    stops = []
+    if duration > 5.0:
+        while start < frames:
+            if start + samples_needed > frames:
+                starts.append(frames - samples_needed)
+                stops.append(frames)
+            else:
+                starts.append(start)
+                stops.append(stop)
 
-    return image
+            start += samples_needed
+            stop += samples_needed
+    else:
+        starts = [0]
+        stops = [frames]
+
+    images = np.empty((len(starts), 299, 299, 3))
+    for idx, (begin, end) in enumerate(zip(starts, stops)):
+        # Generate the spectrogram
+        spectrogram = samples_to_spec(samples[begin:end], input_sample_rate)
+
+        # Generate an image and resize it
+        image = Image \
+            .fromarray(spectrogram) \
+            .convert("RGB") \
+            .resize((299, 299))
+
+        images[idx] = np.array(image) / 255.
+
+    return duration, images
