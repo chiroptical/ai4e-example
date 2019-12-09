@@ -1,0 +1,43 @@
+swagger: "2.0"
+info:
+  description: "Something pleasant here..."
+  version: "1.0.0"
+  title: "500 Bird Detector"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "MIT"
+    url: "https://opensource.org/licenses/MIT"
+host: "somewhere_on_azure.com"
+basePath: "/v1"
+tags:
+- name: "birds"
+  description: "..."
+  externalDocs:
+    description: "Find out more"
+    url: "https://github.com/barrymoo/ai4e-example"
+schemes:
+- "https"
+paths:
+  /detect:
+    post:
+      tags:
+      - "birds"
+      summary: "Add a new pet to the store"
+      description: ""
+      operationId: "addPet"
+      consumes:
+      - "application/wav"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "A wav file greater >= 5 s and <= 20 s"
+        required: true
+        schema:
+          type: "string"
+          format: bytes
+      responses:
+        405:
+          description: "Invalid input"
