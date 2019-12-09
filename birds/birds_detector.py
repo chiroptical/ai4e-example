@@ -21,7 +21,7 @@ def min_max_scale(spect, feature_range=(0, 1)):
 
 
 def bandpass(lower, upper, freq, spec):
-    '''
+    """
     Applies a bandpass filter to a spectrogram
 
     Inputs:
@@ -32,7 +32,7 @@ def bandpass(lower, upper, freq, spec):
     Returns:
         freq, spec adjusted to only include the desired frequencies
         
-    '''
+    """
 
     lowest_index = np.abs(freq - lower).argmin()
     highest_index = np.abs(freq - upper).argmin()
@@ -42,7 +42,7 @@ def bandpass(lower, upper, freq, spec):
 
 
 def samples_to_spec(input_samples, input_sample_rate, target_sample_rate=22050):
-    '''
+    """
     Generates a spectrogram image from samples
 
     Inputs:
@@ -54,9 +54,11 @@ def samples_to_spec(input_samples, input_sample_rate, target_sample_rate=22050):
         spectrogram: As a Frequency x Time matrix
 
     Note: this code was revamped by Justin Kitzes, 2019/06/28
-    '''
+    """
 
-    samples = resample(input_samples, input_sample_rate, target_sample_rate, res_type="kaiser_fast")
+    samples = resample(
+        input_samples, input_sample_rate, target_sample_rate, res_type="kaiser_fast"
+    )
 
     # freq, time, spec = ...
     _, _, spec = signal.spectrogram(
@@ -71,13 +73,13 @@ def samples_to_spec(input_samples, input_sample_rate, target_sample_rate=22050):
 
     # Convert to decibel units
     spec = power_to_db(spec[::-1, :])
-    
+
     # Apply gain and range as in Audacity defaults
     spec_gain = 20
     spec_range = 80
     spec[spec > -spec_gain] = -spec_gain
     spec[spec < -(spec_gain + spec_range)] = -(spec_gain + spec_range)
-    
+
     return 255 - min_max_scale(spec, feature_range=(0, 200))
 
 
@@ -90,9 +92,7 @@ def open_audio(audio_bytes):
     """
 
     # Load the samples
-    samples, input_sample_rate = soundfile_read(
-        audio_bytes,
-    )
+    samples, input_sample_rate = soundfile_read(audio_bytes)
 
     # Compute duration
     frames = len(samples)
@@ -125,11 +125,8 @@ def open_audio(audio_bytes):
         spectrogram = samples_to_spec(samples[begin:end], input_sample_rate)
 
         # Generate an image and resize it
-        image = Image \
-            .fromarray(spectrogram) \
-            .convert("RGB") \
-            .resize((299, 299))
+        image = Image.fromarray(spectrogram).convert("RGB").resize((299, 299))
 
-        images[idx] = np.array(image) / 255.
+        images[idx] = np.array(image) / 255.0
 
     return duration, images
