@@ -5,3 +5,9 @@
 - To run the API, `python client/test.py`
   - Requires `requests`
   - Should return: `True`
+- To stop the container,
+
+```
+docker ps # grab the "CONTAINER ID"
+docker stop {container_id}
+```
