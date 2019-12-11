@@ -1,8 +1,8 @@
 # AI4E Container Example
 
-### Setup
+### Install required packages
 
-Ensure `git` and `git-lfs` are installed, and initialize git-lfs.
+Ensure `git` and `git-lfs` are installed, and initialize git-lfs (e.g. for Mac):
 ```
 # Update global git config
 $ git lfs install
@@ -11,9 +11,14 @@ $ git lfs install
 $ sudo git lfs install --system
 ```
 
-### Docker
-- Build the container `docker build . -t barrymoo/ai4e-example:latest`
-- Run the container locally: `docker run -p 8081:80 barrymoo/ai4e-example:latest`
+Install docker for your operating system: https://www.docker.com/get-started
+
+### Build and run container
+
+Replace `{your_username}` with your Docker username in the following commands:
+
+- Build the container `docker build . -t {your_username}/ai4e-example:latest`
+- Run the container locally: `docker run -p 8081:80 {your_username}/ai4e-example:latest`
 - To run the API, `python client/test.py`
   - Requires `requests`
   - Should return: `True`
