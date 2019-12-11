@@ -2,16 +2,9 @@
 
 ### Install required packages
 
-Ensure `git` and `git-lfs` are installed, and initialize git-lfs (e.g. for Mac):
-```
-# Update global git config
-$ git lfs install
-
-# Update system git config
-$ sudo git lfs install --system
-```
-
-Install docker for your operating system: https://www.docker.com/get-started
+* `git` and `git-lfs` (for storing large files): https://help.github.com/en/github/managing-large-files/installing-git-large-file-storage
+* Docker: https://www.docker.com/get-started
+* Python libraries `requests` and `pytest`
 
 ### Docker
 Replace `{your_username}` with your Docker username in the following commands: 
