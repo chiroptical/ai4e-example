@@ -83,42 +83,69 @@ def samples_to_spec(input_samples, input_sample_rate, target_sample_rate=22050):
     return 255 - min_max_scale(spec, feature_range=(0, 200))
 
 
-def open_audio(audio_bytes):
-    """ Open audio in binary format using ...
+def load_samples(audio_bytes):
+    """ Use libsndfile to extract the samples and sample rate
+
     Args:
         audio_bytes: wav file in bytes
-    Returns:
+
+    Return:
+        samples: The audio samples
+        sample_rate: The sample rate of the original audio
+    """
+    return soundfile_read(audio_bytes)
+
+
+def audio_duration(samples, sample_rate):
+    """ Given samples and sample rate return data to make predictions on
+
+    Args:
+        samples: The audio samples from libsndfile
+        sample_rate: The sampling rate of the samples
+
+    Return:
+        duration: The audio duration in seconds
+        image: A 299 by 299 image
+    """
+    return len(samples) / sample_rate
+
+
+def open_audio(samples, input_sample_rate, duration):
+    """ Given samples and sample rate return data to make predictions on
+
+    Args:
+        samples: The audio samples from libsndfile
+        sample_rate: The sampling rate of the samples
+        duration: The duration of the audio
+
+    Return:
+        duration: The audio duration in seconds
         image: A 299 by 299 image
     """
 
-    # Load the samples
-    samples, input_sample_rate = soundfile_read(audio_bytes)
-
-    # Compute duration
+    # Number of frames
     frames = len(samples)
-    duration = frames / input_sample_rate
 
-    # Split if necessary
+    # Determine 5 second chunks which need to
+    # be predicted on
     samples_needed = 5 * input_sample_rate
     start = 0
     starts = []
     stop = samples_needed
     stops = []
-    if duration > 5.0:
-        while start < frames:
-            if start + samples_needed > frames:
-                starts.append(frames - samples_needed)
-                stops.append(frames)
-            else:
-                starts.append(start)
-                stops.append(stop)
+    while start < frames:
+        if start + samples_needed > frames:
+            starts.append(frames - samples_needed)
+            stops.append(frames)
+        else:
+            starts.append(start)
+            stops.append(stop)
 
-            start += samples_needed
-            stop += samples_needed
-    else:
-        starts = [0]
-        stops = [frames]
+        start += samples_needed
+        stop += samples_needed
 
+    # Now we can generate spectrograms and store them in
+    # images
     images = np.empty((len(starts), 299, 299, 3))
     for idx, (begin, end) in enumerate(zip(starts, stops)):
         # Generate the spectrogram
@@ -129,4 +156,4 @@ def open_audio(audio_bytes):
 
         images[idx] = np.array(image) / 255.0
 
-    return duration, images
+    return images
