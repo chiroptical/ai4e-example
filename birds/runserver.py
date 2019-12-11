@@ -3,14 +3,9 @@
 from flask import Flask, request
 from ai4e_app_insights_wrapper import AI4EAppInsights
 from ai4e_service import APIService
-from PIL import Image
 from io import BytesIO
-from os import getenv
-import uuid
-import sys
 import tensorflow as tf
 import pandas as pd
-import numpy as np
 import birds_detector
 
 print("Creating Application")
@@ -29,16 +24,19 @@ with app.app_context():
 
 # Load the model and species dataframe
 # The model was copied to this location when the container was built; see ../Dockerfile
-model = tf.keras.models.load_model("/app/birds/model.h5")
-species = pd.read_csv("/app/birds/species.csv")
+MODEL = tf.keras.models.load_model("/app/birds/model.h5")
+SPECIES = pd.read_csv("/app/birds/species.csv")
 
-# Define a function for processing request data, if appliciable.  This function loads data or files into
-# a dictionary for access in your API function.  We pass this function as a parameter to your API setup.
-def process_request_data(request):
-    return_values = {"audio_io": None}
+# Define a function for processing request data, if appliciable. This function
+# loads data or files into a dictionary for access in your API function. We
+# pass this function as a parameter to your API setup.
+def process_request_data(req):
+    """ Wrap input data into BytesIO object
+    """
     try:
-        # Attempt to load the body
-        return_values["audio_io"] = BytesIO(request.data)
+        return_values = {"audio_io": None}
+        if req.data != b"":
+            return_values["audio_io"] = BytesIO(req.data)
     except:
         log.log_error("Unable to load the request data")  # Log to Application Insights
     return return_values
@@ -55,19 +53,36 @@ def process_request_data(request):
     trace_name="post:detect",
 )
 def detect(*args, **kwargs):
+    """ Return predictions
+    """
     print("runserver.py: detect() called")
     audio_io = kwargs.get("audio_io")
 
+    # Just return error if no data was posted
+    if not audio_io:
+        return {"error": "No data was given with post?"}
+
+    # Make sure we can load the data given to us
+    try:
+        samples, sample_rate = birds_detector.load_samples(audio_io)
+    except:
+        return {"error": "I could not load the audio"}
+
+    # Check the duration is between 5 and 20 seconds
+    duration = birds_detector.audio_duration(samples, sample_rate)
+    if duration < 5 or duration > 20:
+        return {"error": "Audio duration should be between 5 and 20 seconds long"}
+
     print("runserver.py: detect(), opening audio")
-    _, images = birds_detector.open_audio(audio_io)
+    images = birds_detector.open_audio(samples, sample_rate, duration)
 
     print("runserver.py: detect(), predict")
-    preds = model.predict(images)
+    preds = MODEL.predict(images)
 
     print("runserver.py: detect(), generate scores")
-    scores = [[None] * species.shape[0] for _ in range(preds.shape[0])]
+    scores = [[None] * SPECIES.shape[0] for _ in range(preds.shape[0])]
     for p_idx, pred in enumerate(preds):
-        for idx, (cls, score) in enumerate(zip(species["species"].values, pred)):
+        for idx, (cls, score) in enumerate(zip(SPECIES["species"].values, pred)):
             scores[p_idx][idx] = f"{cls}: {score:.5f}"
 
     print("runserver.py: detect(), return predictions")
