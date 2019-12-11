@@ -11,3 +11,7 @@
 docker ps # grab the "CONTAINER ID"
 docker stop {container_id}
 ```
+
+## Contributing
+
+- The `swagger.yaml` file is best edited via https://editor.swagger.io

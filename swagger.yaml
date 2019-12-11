@@ -1,31 +1,38 @@
 swagger: "2.0"
 info:
-  description: "Something pleasant here..."
-  version: "1.0.0"
-  title: "500 Bird Detector"
+  description: "Using a Convolutional Neural Net ..."
+  version: "0.0.1"
+  title: "Opensoundscape Bird Detector"
   contact:
-    email: "apiteam@swagger.io"
+    email: "moore0557@gmail.com"
   license:
     name: "MIT"
-    url: "https://opensource.org/licenses/MIT"
+    url: "https://github.com/barrymoo/ai4e-example/blob/master/LICENSE"
 host: "somewhere_on_azure.com"
 basePath: "/v1"
 tags:
 - name: "birds"
-  description: "..."
-  externalDocs:
-    description: "Find out more"
-    url: "https://github.com/barrymoo/ai4e-example"
+  description: "Making predictions"
 schemes:
 - "https"
 paths:
+  /:
+    get:
+      tags:
+      - "birds"
+      summary: "Check if the API is up"
+      description: "GET / description"
+      operationId: "healthCheck"
+      responses:
+        405:
+          description: "Invalid input"
   /detect:
     post:
       tags:
       - "birds"
-      summary: "Add a new pet to the store"
+      summary: "Make prediction on audio"
       description: ""
-      operationId: "addPet"
+      operationId: "predictBirds"
       consumes:
       - "application/wav"
       produces:
