@@ -11,9 +11,9 @@
 Replace `{your_username}` with your Docker username in the following commands: 
 
 - Build the container `docker build . -t {your_username}/ai4e-example:latest`
-- Run the tests using `pytest` from the root directory
 - Run the container locally: `docker run -p 8081:80 {your_username}/ai4e-example:latest`
-- To stop the container,
+- In another terminal window, run the tests using `pytest` from the root directory
+- To stop the container, in another terminal window, run:
 
 ```
 docker ps # grab the "CONTAINER ID"
