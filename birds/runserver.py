@@ -6,6 +6,7 @@ from ai4e_service import APIService
 from io import BytesIO
 import tensorflow as tf
 import pandas as pd
+import numpy as np
 import birds_detector
 
 print("Creating Application")
@@ -58,11 +59,13 @@ def detect(*args, **kwargs):
     print("runserver.py: detect() called")
     audio_io = kwargs.get("audio_io")
 
+    print("runserver.py: detect() checking inputs")
     # Just return error if no data was posted
     if not audio_io:
         return {"error": "No data was given with post?"}
 
     # Make sure we can load the data given to us
+    print("runserver.py: detect() load samples")
     try:
         samples, sample_rate = birds_detector.load_samples(audio_io)
     except:
@@ -72,6 +75,15 @@ def detect(*args, **kwargs):
     duration = birds_detector.audio_duration(samples, sample_rate)
     if duration < 5 or duration > 20:
         return {"error": "Audio duration should be between 5 and 20 seconds long"}
+
+    # Check for single- or dual-channel
+    if len(samples.shape) > 2:
+        return {"error": "Audio has more than two channels, ignoring"}
+    
+    # libsndfile, reads dual-channel files as (N, 2) but librosa
+    # requires (2, N)
+    if len(samples.shape) == 2:
+        samples = birds_detector.to_mono(samples)
 
     print("runserver.py: detect(), opening audio")
     images = birds_detector.open_audio(samples, sample_rate, duration)
