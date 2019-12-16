@@ -6,7 +6,9 @@ import PIL.ImageDraw as ImageDraw
 import PIL.ImageFont as ImageFont
 
 from io import BytesIO
-from librosa import resample, to_mono, power_to_db
+
+# from librosa import resample, to_mono, power_to_db
+import librosa
 from scipy import signal
 from sklearn.preprocessing import MinMaxScaler
 from soundfile import read as soundfile_read
@@ -56,7 +58,7 @@ def samples_to_spec(input_samples, input_sample_rate, target_sample_rate=22050):
     Note: this code was revamped by Justin Kitzes, 2019/06/28
     """
 
-    samples = resample(
+    samples = librosa.resample(
         input_samples, input_sample_rate, target_sample_rate, res_type="kaiser_fast"
     )
 
@@ -72,7 +74,7 @@ def samples_to_spec(input_samples, input_sample_rate, target_sample_rate=22050):
     )
 
     # Convert to decibel units
-    spec = power_to_db(spec[::-1, :])
+    spec = librosa.power_to_db(spec[::-1, :])
 
     # Apply gain and range as in Audacity defaults
     spec_gain = 20
@@ -81,6 +83,12 @@ def samples_to_spec(input_samples, input_sample_rate, target_sample_rate=22050):
     spec[spec < -(spec_gain + spec_range)] = -(spec_gain + spec_range)
 
     return 255 - min_max_scale(spec, feature_range=(0, 200))
+
+
+def to_mono(samples):
+    """ Reshape samples and convert to_mono via librosa
+    """
+    return librosa.to_mono(np.reshape(samples, (2, -1)))
 
 
 def load_samples(audio_bytes):

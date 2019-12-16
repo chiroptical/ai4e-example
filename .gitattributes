@@ -1,2 +1,4 @@
 client/cardinalis-cardinalis.wav filter=lfs diff=lfs merge=lfs -text
 client/double-cc.wav filter=lfs diff=lfs merge=lfs -text
+client/dual-channel.wav filter=lfs diff=lfs merge=lfs -text
+client/four-channel.wav filter=lfs diff=lfs merge=lfs -text
