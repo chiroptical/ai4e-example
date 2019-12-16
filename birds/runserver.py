@@ -77,9 +77,9 @@ def detect(*args, **kwargs):
         return {"error": "Audio duration should be between 5 and 20 seconds long"}
 
     # Check for single- or dual-channel
-    if len(samples.shape) > 2:
+    if len(samples.shape) == 2 and samples.shape[0] > 2:
         return {"error": "Audio has more than two channels, ignoring"}
-    
+
     # libsndfile, reads dual-channel files as (N, 2) but librosa
     # requires (2, N)
     if len(samples.shape) == 2:
