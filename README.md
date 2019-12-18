@@ -1,10 +1,19 @@
 # AI4E Container Example
 
-- Build the container `docker build . -t barrymoo/ai4e-example:latest`
-- Run the container locally: `docker run -p 8081:80 barrymoo/ai4e-example:latest`
-- Run the tests using `pytest` from the root directory
-  - Requires `requests` and `pytest`
-- To stop the container,
+### Obtain requirements
+
+* Install `git` and `git-lfs` (for storing large files): https://help.github.com/en/github/managing-large-files/installing-git-large-file-storage
+* Install Docker: https://www.docker.com/get-started
+* Install Python libraries `requests` and `pytest`
+* Machine learning model (place in ./model/model.h5)
+
+### Docker
+Replace `{your_username}` with your Docker username in the following commands: 
+
+- Build the container `docker build . -t {your_username}/ai4e-example:latest`
+- Run the container locally: `docker run -p 8081:80 {your_username}/ai4e-example:latest`
+- In another terminal window, run the tests using `pytest` from the root directory
+- To stop the container, in another terminal window, run:
 
 ```
 docker ps # grab the "CONTAINER ID"

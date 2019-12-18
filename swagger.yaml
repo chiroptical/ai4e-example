@@ -1,8 +1,8 @@
 swagger: "2.0"
 info:
-  description: "Using a Convolutional Neural Net ..."
+  description: "Detecting over 500 species of common North American birds using convolutional neural networks"
   version: "0.0.1"
-  title: "Opensoundscape Bird Detector"
+  title: "500birds Detector"
   contact:
     email: "moore0557@gmail.com"
   license:
@@ -12,7 +12,7 @@ host: "somewhere_on_azure.com"
 basePath: "/v1"
 tags:
 - name: "birds"
-  description: "Making predictions"
+  description: "Viewing and making predictions on audio files"
 schemes:
 - "https"
 paths:
@@ -33,6 +33,28 @@ paths:
       summary: "Make prediction on audio"
       description: ""
       operationId: "predictBirds"
+      consumes:
+      - "application/wav"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "A wav file greater >= 5 s and <= 20 s"
+        required: true
+        schema:
+          type: "string"
+          format: bytes
+      responses:
+        405:
+          description: "Invalid input"
+  /spect:
+    post:
+      tags:
+      - "birds"
+      summary: "Generate spectrogram from audio"
+      description: ""
+      operationId: "generateSpect"
       consumes:
       - "application/wav"
       produces:
