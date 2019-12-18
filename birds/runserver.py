@@ -28,7 +28,7 @@ with app.app_context():
 MODEL = tf.keras.models.load_model("/app/birds/model.h5")
 SPECIES = pd.read_csv("/app/birds/species.csv")
 
-# Define a function for processing request data, if appliciable. This function
+# Define a function for processing request data, if applicable. This function
 # loads data or files into a dictionary for access in your API function. We
 # pass this function as a parameter to your API setup.
 def process_request_data(req):
@@ -99,6 +99,58 @@ def detect(*args, **kwargs):
 
     print("runserver.py: detect(), return predictions")
     return {"predictions": scores}
+
+
+@ai4e_service.api_sync_func(
+    api_path="/spect",
+    methods=["POST"],
+    request_processing_function=process_request_data,  
+    maximum_concurrent_requests=5,
+    content_types=ACCEPTED_CONTENT_TYPES,
+    content_max_length=10000,
+    trace_name="post:spect",
+)
+def spect(*args, **kwargs):
+    """ Return spectrogram
+    """
+    
+    
+    print("runserver.py: spect() called")
+    audio_io = kwargs.get("audio_io")
+
+    print("runserver.py: spect() checking inputs")
+    # Just return error if no data was posted
+    if not audio_io:
+        return {"error": "No data was given with post?"}
+
+    # Make sure we can load the data given to us
+    print("runserver.py: spect() load samples")
+    try:
+        samples, sample_rate = birds_detector.load_samples(audio_io)
+    except:
+        return {"error": "I could not load the audio"}
+
+    # Check the duration is between 5 and 20 seconds
+    duration = birds_detector.audio_duration(samples, sample_rate)
+    if duration < 5 or duration > 20:
+        return {"error": "Audio duration should be between 5 and 20 seconds long"}
+
+    # Check for single- or dual-channel
+    if len(samples.shape) == 2 and samples.shape[1] > 2:
+        return {"error": "Audio has more than two channels, ignoring"}
+
+    # libsndfile, reads dual-channel files as (N, 2) but librosa
+    # requires (2, N)
+    if len(samples.shape) == 2:
+        samples = birds_detector.to_mono(samples)
+
+    print("runserver.py: spect(), opening audio")
+    images = birds_detector.open_audio(samples, sample_rate, duration)
+    
+    print("runserver.py: spect(), return spectrogram(s)")
+    return {'images': (images*255).tolist()}
+
+    
 
 
 if __name__ == "__main__":
