@@ -43,6 +43,56 @@ def process_request_data(req):
     return return_values
 
 
+def process_audio(func_name, audio_io):
+    '''
+    Check inputs and return spectrogram images
+    
+    Check that inputs are in correct format (single-channel,
+    between 5-20 seconds), and convert to images
+    
+    Args:
+        func_name (str): name of calling function (for printing)
+        audio_io (bytes): 
+    
+    Returns:
+        array of 299x299 images, each representing up to 
+            5s of the original audio
+    
+    '''
+    print(f"runserver.py: {func_name}() checking inputs")
+    # Just return error if no data was posted
+    if not audio_io:
+        return {"error": "No data was given with post?"}
+
+    # Make sure we can load the data given to us
+    print(f"runserver.py: {func_name}() load samples")
+    try:
+        samples, sample_rate = birds_detector.load_samples(audio_io)
+    except:
+        return {"error": "I could not load the audio"}
+
+    # Check the duration is between 5 and 20 seconds
+    duration = birds_detector.audio_duration(samples, sample_rate)
+    if duration < 5 or duration > 20:
+        return {"error": "Audio duration should be between 5 and 20 seconds long"}
+
+    # Check for single- or dual-channel
+    #if len(samples.shape) == 2 and samples.shape[1] > 2:
+    #    return {"error": "Audio has more than two channels, ignoring"}
+    if len(samples.shape) == 2:
+        return {"error": "Audio has more than one channel, ignoring"}
+
+    # Force to mono
+    #if len(samples.shape) == 2:
+    #    print(f"runserver.py: {func_name}() forcing audio to mono")
+    #    samples = birds_detector.to_mono(samples)
+
+    print(f"runserver.py: {func_name}(), opening audio as spectrograms")
+    return {'images': birds_detector.open_audio(samples, sample_rate, duration)}
+
+    
+
+
 # POST, async API endpoint example
 @ai4e_service.api_sync_func(
     api_path="/detect",
@@ -58,35 +108,13 @@ def detect(*args, **kwargs):
     """
     print("runserver.py: detect() called")
     audio_io = kwargs.get("audio_io")
-
-    print("runserver.py: detect() checking inputs")
-    # Just return error if no data was posted
-    if not audio_io:
-        return {"error": "No data was given with post?"}
-
-    # Make sure we can load the data given to us
-    print("runserver.py: detect() load samples")
-    try:
-        samples, sample_rate = birds_detector.load_samples(audio_io)
-    except:
-        return {"error": "I could not load the audio"}
-
-    # Check the duration is between 5 and 20 seconds
-    duration = birds_detector.audio_duration(samples, sample_rate)
-    if duration < 5 or duration > 20:
-        return {"error": "Audio duration should be between 5 and 20 seconds long"}
-
-    # Check for single- or dual-channel
-    if len(samples.shape) == 2 and samples.shape[1] > 2:
-        return {"error": "Audio has more than two channels, ignoring"}
-
-    # libsndfile, reads dual-channel files as (N, 2) but librosa
-    # requires (2, N)
-    if len(samples.shape) == 2:
-        samples = birds_detector.to_mono(samples)
-
-    print("runserver.py: detect(), opening audio")
-    images = birds_detector.open_audio(samples, sample_rate, duration)
+    
+    load_output = process_audio(func_name = 'detect', audio_io = audio_io)
+    
+    if "error" in load_output.keys():
+        return load_output
+    else:
+        images = load_output['images']
 
     print("runserver.py: detect(), predict")
     preds = MODEL.predict(images)
@@ -117,35 +145,13 @@ def spect(*args, **kwargs):
     
     print("runserver.py: spect() called")
     audio_io = kwargs.get("audio_io")
-
-    print("runserver.py: spect() checking inputs")
-    # Just return error if no data was posted
-    if not audio_io:
-        return {"error": "No data was given with post?"}
-
-    # Make sure we can load the data given to us
-    print("runserver.py: spect() load samples")
-    try:
-        samples, sample_rate = birds_detector.load_samples(audio_io)
-    except:
-        return {"error": "I could not load the audio"}
-
-    # Check the duration is between 5 and 20 seconds
-    duration = birds_detector.audio_duration(samples, sample_rate)
-    if duration < 5 or duration > 20:
-        return {"error": "Audio duration should be between 5 and 20 seconds long"}
-
-    # Check for single- or dual-channel
-    if len(samples.shape) == 2 and samples.shape[1] > 2:
-        return {"error": "Audio has more than two channels, ignoring"}
-
-    # libsndfile, reads dual-channel files as (N, 2) but librosa
-    # requires (2, N)
-    if len(samples.shape) == 2:
-        samples = birds_detector.to_mono(samples)
-
-    print("runserver.py: spect(), opening audio")
-    images = birds_detector.open_audio(samples, sample_rate, duration)
+    
+    load_output = process_audio(func_name = 'spect', audio_io = audio_io)
+    
+    if "error" in load_output.keys():
+        return load_output
+    else:
+        images = load_output['images']
     
     print("runserver.py: spect(), return spectrogram(s)")
     return {'images': (images*255).tolist()}

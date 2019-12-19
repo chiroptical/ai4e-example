@@ -46,10 +46,9 @@ def test_predicts_cardinalis(basic_wav_file, api_url):
 
 def test_four_channel_fails(four_channel_audio, api_url):
     req = requests.post(api_url, data=four_channel_audio)
-    assert req.json() == {"error": "Audio has more than two channels, ignoring"}
+    assert req.json() == {"error": "Audio has more than one channel, ignoring"}
 
 
-def test_dual_channel_returns_predictions(dual_channel_audio, api_url):
-    res = requests.post(api_url, data=dual_channel_audio).json()
-    assert len(res["predictions"]) == 2
-    assert len(res["predictions"][0]) == 508
+def test_dual_channel_fails(dual_channel_audio, api_url):
+    req = requests.post(api_url, data=dual_channel_audio)
+    assert req.json() == {"error": "Audio has more than one channel, ignoring"}
