@@ -145,9 +145,11 @@ def open_audio(samples, input_sample_rate, duration):
     stops = []
     while start < frames:
         if start + samples_needed > frames:
+            # Get the last 5 seconds
             starts.append(frames - samples_needed)
             stops.append(frames)
         else:
+            # Get the next 5 seconds
             starts.append(start)
             stops.append(stop)
 
