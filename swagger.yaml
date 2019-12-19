@@ -40,7 +40,7 @@ paths:
       parameters:
       - in: "body"
         name: "body"
-        description: "A wav file greater >= 5 s and <= 20 s"
+        description: "A single-channel wav file greater >= 5 s and <= 20 s"
         required: true
         schema:
           type: "string"
@@ -62,7 +62,7 @@ paths:
       parameters:
       - in: "body"
         name: "body"
-        description: "A wav file greater >= 5 s and <= 20 s"
+        description: "A single-channel wav file greater >= 5 s and <= 20 s"
         required: true
         schema:
           type: "string"

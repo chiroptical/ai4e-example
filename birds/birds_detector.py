@@ -88,6 +88,8 @@ def samples_to_spec(input_samples, input_sample_rate, target_sample_rate=22050):
 def to_mono(samples):
     """ Reshape samples and convert to_mono via librosa
     """
+    # libsndfile reads dual-channel files as (N, 2) but librosa
+    # requires (2, N)
     return librosa.to_mono(np.reshape(samples, (2, -1)))
 
 
@@ -127,8 +129,8 @@ def open_audio(samples, input_sample_rate, duration):
         duration: The duration of the audio
 
     Return:
-        duration: The audio duration in seconds
-        image: A 299 by 299 image
+        images: array of 299 by 299 images, each 
+            representing up to 5s of audio
     """
 
     # Number of frames
