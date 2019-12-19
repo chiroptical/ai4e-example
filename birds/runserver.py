@@ -23,10 +23,16 @@ log = AI4EAppInsights()
 with app.app_context():
     ai4e_service = APIService(app, log)
 
-# Load the model and species dataframe
-# The model was copied to this location when the container was built; see ../Dockerfile
-MODEL = tf.keras.models.load_model("/app/birds/model.h5")
-SPECIES = pd.read_csv("/app/birds/species.csv")
+# Load the models and species dataframe
+# The models were copied to this location when the container was built; see ../Dockerfile
+#MODEL = tf.keras.models.load_model("/app/model/model.h5")
+#SPECIES = pd.read_csv("/app/birds/species.csv")
+MODEL1_PATH = "/app/birds/model_passerines.h5"
+MODEL2_PATH = "/app/birds/model_nonpasserines.h5"
+MODEL1 = tf.keras.models.load_model(MODEL1_PATH)
+MODEL2 = tf.keras.models.load_model(MODEL2_PATH)
+SPECIES1 = pd.read_csv("/app/birds/species_passerines.csv")
+SPECIES2 = pd.read_csv("/app/birds/species_nonpasserines.csv")
 
 # Define a function for processing request data, if applicable. This function
 # loads data or files into a dictionary for access in your API function. We
@@ -88,8 +94,20 @@ def process_audio(func_name, audio_io):
     #    samples = birds_detector.to_mono(samples)
 
     print(f"runserver.py: {func_name}(), opening audio as spectrograms")
-    return {'images': birds_detector.open_audio(samples, sample_rate, duration)}
+    return {'images': birds_detector.open_audio(samples, sample_rate, duration)}    
 
+def format_preds(preds, species_df):
+    '''
+    
+    '''
+    
+    scores = [[None] * species_df.shape[0] for _ in range(preds.shape[0])]
+    
+    for p_idx, pred in enumerate(preds):
+        for idx, (cls, score) in enumerate(zip(species_df["species"].values, pred)):
+            scores[p_idx][idx] = f"{cls}: {score:.5f}"
+    
+    return scores
     
 
 
@@ -106,6 +124,8 @@ def process_audio(func_name, audio_io):
 def detect(*args, **kwargs):
     """ Return predictions
     """
+
+    
     print("runserver.py: detect() called")
     audio_io = kwargs.get("audio_io")
     
@@ -117,16 +137,15 @@ def detect(*args, **kwargs):
         images = load_output['images']
 
     print("runserver.py: detect(), predict")
-    preds = MODEL.predict(images)
+    preds1 = MODEL1.predict(images)
+    preds2 = MODEL2.predict(images)
 
     print("runserver.py: detect(), generate scores")
-    scores = [[None] * SPECIES.shape[0] for _ in range(preds.shape[0])]
-    for p_idx, pred in enumerate(preds):
-        for idx, (cls, score) in enumerate(zip(SPECIES["species"].values, pred)):
-            scores[p_idx][idx] = f"{cls}: {score:.5f}"
-
+    scores1 = format_preds(preds1, species_df=SPECIES1)
+    scores2 = format_preds(preds2, species_df=SPECIES2)
+    
     print("runserver.py: detect(), return predictions")
-    return {"predictions": scores}
+    return {"predictions": {MODEL1_PATH: scores1, MODEL2_PATH: scores2}}
 
 
 @ai4e_service.api_sync_func(

@@ -68,8 +68,8 @@ RUN chmod +x /startup.sh
 # Copy your API code
 COPY ./birds /app/birds
 
-# Copy the Model
-COPY ./model/model.h5 /app/birds
+# Copy all models
+COPY ./model/*.h5 /app/birds/
 
 # Copy the species metadata
 COPY ./birds/species.csv /app/birds/species.csv
