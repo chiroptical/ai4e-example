@@ -68,11 +68,13 @@ RUN chmod +x /startup.sh
 # Copy your API code
 COPY ./birds /app/birds
 
-# Copy the Model
-COPY ./model/model.h5 /app/birds
+# Copy the models
+COPY ./models/model_passerines.h5 /app/birds
+COPY ./models/model_nonpasserines.h5 /app/birds
 
 # Copy the species metadata
-COPY ./birds/species.csv /app/birds/species.csv
+COPY ./models/species_passerines.csv /app/birds
+COPY ./models/species_nonpasserines.csv /app/birds
 
 # Application Insights keys and trace configuration
 ENV APPINSIGHTS_INSTRUMENTATIONKEY= \
