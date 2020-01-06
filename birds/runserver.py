@@ -44,7 +44,7 @@ def process_request_data(req):
 
 
 def process_audio(func_name, audio_io):
-    '''
+    """
     Check inputs and return spectrogram images
     
     Check that inputs are in correct format (single-channel,
@@ -58,7 +58,7 @@ def process_audio(func_name, audio_io):
         array of 299x299 images, each representing up to 
             5s of the original audio
     
-    '''
+    """
     print(f"runserver.py: {func_name}() checking inputs")
     # Just return error if no data was posted
     if not audio_io:
@@ -77,20 +77,18 @@ def process_audio(func_name, audio_io):
         return {"error": "Audio duration should be between 5 and 20 seconds long"}
 
     # Check for single- or dual-channel
-    #if len(samples.shape) == 2 and samples.shape[1] > 2:
+    # if len(samples.shape) == 2 and samples.shape[1] > 2:
     #    return {"error": "Audio has more than two channels, ignoring"}
-    if len(samples.shape) == 2:
+    if len(samples.shape) > 1:
         return {"error": "Audio has more than one channel, ignoring"}
 
     # Force to mono
-    #if len(samples.shape) == 2:
+    # if len(samples.shape) == 2:
     #    print(f"runserver.py: {func_name}() forcing audio to mono")
     #    samples = birds_detector.to_mono(samples)
 
     print(f"runserver.py: {func_name}(), opening audio as spectrograms")
-    return {'images': birds_detector.open_audio(samples, sample_rate, duration)}
-
-    
+    return {"images": birds_detector.open_audio(samples, sample_rate, duration)}
 
 
 # POST, async API endpoint example
@@ -108,55 +106,52 @@ def detect(*args, **kwargs):
     """
     print("runserver.py: detect() called")
     audio_io = kwargs.get("audio_io")
-    
-    load_output = process_audio(func_name = 'detect', audio_io = audio_io)
-    
+
+    load_output = process_audio(func_name="detect", audio_io=audio_io)
+
     if "error" in load_output.keys():
         return load_output
     else:
-        images = load_output['images']
+        images = load_output["images"]
 
     print("runserver.py: detect(), predict")
     preds = MODEL.predict(images)
 
     print("runserver.py: detect(), generate scores")
-    scores = [[None] * SPECIES.shape[0] for _ in range(preds.shape[0])]
+    scores = [{} for _ in range(preds.shape[0])]
     for p_idx, pred in enumerate(preds):
-        for idx, (cls, score) in enumerate(zip(SPECIES["species"].values, pred)):
-            scores[p_idx][idx] = f"{cls}: {score:.5f}"
+        for cls, score in zip(SPECIES["species"].values, pred):
+            scores[p_idx][cls] = round(float(score), 5)
 
     print("runserver.py: detect(), return predictions")
     return {"predictions": scores}
 
 
 @ai4e_service.api_sync_func(
-    api_path="/spect",
+    api_path="/spectrogram",
     methods=["POST"],
-    request_processing_function=process_request_data,  
+    request_processing_function=process_request_data,
     maximum_concurrent_requests=5,
     content_types=ACCEPTED_CONTENT_TYPES,
     content_max_length=10000,
-    trace_name="post:spect",
+    trace_name="post:spectrogram",
 )
 def spect(*args, **kwargs):
     """ Return spectrogram
     """
-    
-    
+
     print("runserver.py: spect() called")
     audio_io = kwargs.get("audio_io")
-    
-    load_output = process_audio(func_name = 'spect', audio_io = audio_io)
-    
+
+    load_output = process_audio(func_name="spect", audio_io=audio_io)
+
     if "error" in load_output.keys():
         return load_output
     else:
-        images = load_output['images']
-    
-    print("runserver.py: spect(), return spectrogram(s)")
-    return {'images': (images*255).tolist()}
+        images = load_output["images"]
 
-    
+    print("runserver.py: spect(), return spectrogram(s)")
+    return {"images": (images * 255).tolist()}
 
 
 if __name__ == "__main__":

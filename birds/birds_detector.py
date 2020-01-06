@@ -77,10 +77,10 @@ def samples_to_spec(input_samples, input_sample_rate, target_sample_rate=22050):
     spec = librosa.power_to_db(spec[::-1, :])
 
     # Apply gain and range as in Audacity defaults
-    #spec_gain = 20
-    #spec_range = 80
-    #spec[spec > -spec_gain] = -spec_gain
-    #spec[spec < -(spec_gain + spec_range)] = -(spec_gain + spec_range)
+    # spec_gain = 20
+    # spec_range = 80
+    # spec[spec > -spec_gain] = -spec_gain
+    # spec[spec < -(spec_gain + spec_range)] = -(spec_gain + spec_range)
 
     return 255 - min_max_scale(spec, feature_range=(0, 200))
 
