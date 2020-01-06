@@ -1,0 +1,115 @@
+openapi: 3.0.1
+info:
+  title: Opensoundscape Bird Detector
+  description: Using a Convolutional Neural Net ...
+  contact:
+    email: kitzeslab@gmail.com
+  license:
+    name: MIT
+    url: https://github.com/barrymoo/ai4e-example/blob/master/LICENSE
+  version: 0.0.1
+servers:
+- url: https://somewhere_on_azure.com/v1
+tags:
+- name: birds
+  description: Making predictions
+paths:
+  /:
+    get:
+      tags:
+      - birds
+      summary: Is the API functioning?
+      description: Run a health check against the API. The result will be an empty
+        JSON response
+      operationId: healthCheck
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+        405:
+          description: Invalid input
+          content: {}
+  /detect:
+    post:
+      tags:
+      - birds
+      summary: Make prediction on audio
+      operationId: predictBirds
+      requestBody:
+        description: A wav file greater >= 5 s and <= 20 s
+        content:
+          application/wav:
+            schema:
+              type: string
+              format: bytes
+        required: true
+      responses:
+        200:
+          description: JSON document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detections'
+        405:
+          description: Invalid input
+          content: {}
+      x-codegen-request-body-name: body
+  /spectrogram:
+    post:
+      tags:
+      - birds
+      summary: Return a spectrogram for a given audio file
+      operationId: generateSpectrogram
+      requestBody:
+        description: A wav file greater >= 5 s and <= 20 s
+        content:
+          application/wav:
+            schema:
+              type: string
+              format: bytes
+        required: true
+      responses:
+        200:
+          description: "An array of spectrograms"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Spectrogram'
+        405:
+          description: Invalid input
+          content: {}
+      x-codegen-request-body-name: body
+
+components:
+  schemas:
+    HealthCheck:
+      type: object
+      properties:
+        {}
+    Detections:
+      type: object
+      properties:
+        predictions:
+          description: "An array of array of strings"
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+              format: "{species}: {score}"
+              description: "Species followed by score, separated by ':'"
+    Spectrogram:
+      type: object
+      properties:
+        spectrogram:
+          description: "An array of images"
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+              format: "{value}"
+              description: "A 0 <= {value} <= 255"
