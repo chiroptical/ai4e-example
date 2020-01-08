@@ -67,12 +67,13 @@ def process_audio(func_name, audio_io):
         return {"error": "No data was given with post?"}
 
     # Make sure we can load the data given to us
-    print(f"runserver.py: {func_name}() load samples")
+    print(f"runserver.py: {func_name}() loading samples")
     try:
         samples, sample_rate = birds_detector.load_samples(audio_io)
     except:
         return {"error": "I could not load the audio"}
-
+    print(f"runserver.py: {func_name}() loaded samples at sample_rate {sample_rate}")
+    
     # Check the duration is between 5 and 20 seconds
     duration = birds_detector.audio_duration(samples, sample_rate)
     if duration < 5 or duration > 20:
@@ -109,7 +110,7 @@ def detect(*args, **kwargs):
     print("runserver.py: detect(passerines) called")
     audio_io = kwargs.get("audio_io")
 
-    load_output = process_audio(func_name="detect/passerines", audio_io=audio_io)
+    load_output = process_audio(func_name="detect(passerines)", audio_io=audio_io)
 
     if "error" in load_output.keys():
         return load_output
@@ -144,7 +145,7 @@ def detect(*args, **kwargs):
     print("runserver.py: detect(non_passerines) called")
     audio_io = kwargs.get("audio_io")
 
-    load_output = process_audio(func_name="detect_nonpasserines", audio_io=audio_io)
+    load_output = process_audio(func_name="detect(non_passerines)", audio_io=audio_io)
 
     if "error" in load_output.keys():
         return load_output
