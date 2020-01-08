@@ -25,8 +25,10 @@ with app.app_context():
 
 # Load the model and species dataframe
 # The model was copied to this location when the container was built; see ../Dockerfile
-MODEL = tf.keras.models.load_model("/app/birds/model.h5")
-SPECIES = pd.read_csv("/app/birds/species.csv")
+MODEL_PASSERINES = tf.keras.models.load_model("/app/birds/model_passerines.h5")
+MODEL_NONPASSERINES = tf.keras.models.load_model("/app/birds/model_nonpasserines.h5")
+SPECIES_PASSERINES = pd.read_csv("/app/birds/species_passerines.csv")
+SPECIES_NONPASSERINES = pd.read_csv("/app/birds/species_nonpasserines.csv")
 
 # Define a function for processing request data, if applicable. This function
 # loads data or files into a dictionary for access in your API function. We
@@ -93,37 +95,71 @@ def process_audio(func_name, audio_io):
 
 # POST, async API endpoint example
 @ai4e_service.api_sync_func(
-    api_path="/detect",
+    api_path="/detect/passerines",
     methods=["POST"],
     request_processing_function=process_request_data,  # This is the data process function that you created above.
     maximum_concurrent_requests=5,  # If the number of requests exceed this limit, a 503 is returned to the caller.
     content_types=ACCEPTED_CONTENT_TYPES,
     content_max_length=10000,  # In bytes
-    trace_name="post:detect",
+    trace_name="post:detect_passerines",
 )
 def detect(*args, **kwargs):
     """ Return predictions
     """
-    print("runserver.py: detect() called")
+    print("runserver.py: detect(passerines) called")
     audio_io = kwargs.get("audio_io")
 
-    load_output = process_audio(func_name="detect", audio_io=audio_io)
+    load_output = process_audio(func_name="detect/passerines", audio_io=audio_io)
 
     if "error" in load_output.keys():
         return load_output
-    else:
-        images = load_output["images"]
+    images = load_output["images"]
 
-    print("runserver.py: detect(), predict")
-    preds = MODEL.predict(images)
+    print("runserver.py: detect(passerines), predict")
+    preds = MODEL_PASSERINES.predict(images)
 
-    print("runserver.py: detect(), generate scores")
+    print("runserver.py: detect(passerines), generate scores")
     scores = [{} for _ in range(preds.shape[0])]
     for p_idx, pred in enumerate(preds):
-        for cls, score in zip(SPECIES["species"].values, pred):
+        for cls, score in zip(SPECIES_PASSERINES["species"].values, pred):
             scores[p_idx][cls] = round(float(score), 5)
 
-    print("runserver.py: detect(), return predictions")
+    print("runserver.py: detect(passerines), return predictions")
+    return {"predictions": scores}
+
+
+# POST, async API endpoint example
+@ai4e_service.api_sync_func(
+    api_path="/detect/non_passerines",
+    methods=["POST"],
+    request_processing_function=process_request_data,  # This is the data process function that you created above.
+    maximum_concurrent_requests=5,  # If the number of requests exceed this limit, a 503 is returned to the caller.
+    content_types=ACCEPTED_CONTENT_TYPES,
+    content_max_length=10000,  # In bytes
+    trace_name="post:detect_nonpasserines",
+)
+def detect(*args, **kwargs):
+    """ Return predictions
+    """
+    print("runserver.py: detect(non_passerines) called")
+    audio_io = kwargs.get("audio_io")
+
+    load_output = process_audio(func_name="detect_nonpasserines", audio_io=audio_io)
+
+    if "error" in load_output.keys():
+        return load_output
+    images = load_output["images"]
+
+    print("runserver.py: detect(non_passerines), predict")
+    preds = MODEL_NONPASSERINES.predict(images)
+
+    print("runserver.py: detect(non_passerines), generate scores")
+    scores = [{} for _ in range(preds.shape[0])]
+    for p_idx, pred in enumerate(preds):
+        for cls, score in zip(SPECIES_NONPASSERINES["species"].values, pred):
+            scores[p_idx][cls] = round(float(score), 5)
+
+    print("runserver.py: detect(non_passerines), return predictions")
     return {"predictions": scores}
 
 
@@ -143,12 +179,11 @@ def spect(*args, **kwargs):
     print("runserver.py: spect() called")
     audio_io = kwargs.get("audio_io")
 
-    load_output = process_audio(func_name="spect", audio_io=audio_io)
+    load_output = process_audio(func_name="spectrogram", audio_io=audio_io)
 
     if "error" in load_output.keys():
         return load_output
-    else:
-        images = load_output["images"]
+    images = load_output["images"]
 
     print("runserver.py: spect(), return spectrogram(s)")
     return {"images": (images * 255).tolist()}

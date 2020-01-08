@@ -5,9 +5,12 @@
 * Install `git` and `git-lfs` (for storing large files): https://help.github.com/en/github/managing-large-files/installing-git-large-file-storage
 * Install Docker: https://www.docker.com/get-started
 * Install Python libraries `requests` and `pytest`
-* Machine learning model (place in ./model/model.h5)
+* Please contact authors to obtain models and build the container yourself, it requires:
+  - `./models/model_passerines.h5`
+  - `./models/model_nonpasserines.h5`
 
 ### Docker
+
 Replace `{your_username}` with your Docker username in the following commands: 
 
 - Build the container `docker build . -t {your_username}/ai4e-example:latest`
@@ -22,4 +25,4 @@ docker stop {container_id}
 
 ## Contributing
 
-- The `swagger.yaml` file is best edited via https://editor.swagger.io
+- The `openapi.yaml` file is best viewed via https://editor.swagger.io

@@ -1,24 +1,28 @@
 openapi: 3.0.1
 info:
-  title: Opensoundscape Bird Detector
-  description: Using a Convolutional Neural Net ...
+  title: 500 Bird Detector
+  description: API is set up to generate spectrograms 
   contact:
     email: kitzeslab@gmail.com
   license:
     name: MIT
-    url: https://github.com/barrymoo/ai4e-example/blob/master/LICENSE
+    url: https://github.com/kitzeslab/.../LICENSE
   version: 0.0.1
 servers:
-- url: https://somewhere_on_azure.com/v1
+- url: https://FILL_ME_IN.com/v1
 tags:
-- name: birds
-  description: Making predictions
+- name: function
+  description: Ensure API is functioning
+- name: detection
+  description: Run predictions on audio with various models
+- name: spectrogram
+  description: Spectrogram related endpoints
 paths:
   /:
     get:
       tags:
-      - birds
-      summary: Is the API functioning?
+      - function
+      summary: Check the API is functioning
       description: Run a health check against the API. The result will be an empty
         JSON response
       operationId: healthCheck
@@ -29,12 +33,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthCheck"
-  /detect:
+  /detect/passerines:
     post:
       tags:
-      - birds
-      summary: Make prediction on audio
-      operationId: predictBirds
+      - detection
+      summary: Make prediction on audio containing passerines
+      operationId: predictPasserines
       requestBody:
         description: A wav file greater >= 5 s and <= 20 s
         content:
@@ -50,13 +54,37 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/Detections"
+                  - $ref: "#/components/schemas/PasserinesDetections"
+                  - $ref: "#/components/schemas/Error"
+      x-codegen-request-body-name: body
+  /detect/non_passerines:
+    post:
+      tags:
+      - detection
+      summary: Make prediction on audio containing non passerines
+      operationId: predictNonPasserines
+      requestBody:
+        description: A wav file greater >= 5 s and <= 20 s
+        content:
+          application/wav:
+            schema:
+              type: string
+              format: bytes
+        required: true
+      responses:
+        200:
+          description: JSON document
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/NonPasserinesDetections"
                   - $ref: "#/components/schemas/Error"
       x-codegen-request-body-name: body
   /spectrogram:
     post:
       tags:
-      - birds
+      - spectrogram
       summary: Return a spectrogram for a given audio file
       operationId: generateSpectrogram
       requestBody:
@@ -84,824 +112,28 @@ components:
       type: object
       properties:
         {}
-    Detections:
+    PasserinesDetections:
       type: object
       properties:
         predictions:
-          description: An array of array of strings
+          description: An array of objects with species as key and score as value
           type: array
           items:
             type: object
             properties:
-              dendrocygna-autumnalis:
-                type: number
-              anser-caerulescens:
-                type: number
-              anser-albifrons:
-                type: number
-              branta-bernicla:
-                type: number
-              branta-hutchinsii:
-                type: number
-              branta-canadensis:
-                type: number
-              cygnus-olor:
-                type: number
-              cygnus-buccinator:
-                type: number
-              cygnus-columbianus:
-                type: number
-              alopochen-aegyptiaca:
-                type: number
-              aix-sponsa:
-                type: number
-              spatula-discors:
-                type: number
-              spatula-clypeata:
-                type: number
-              mareca-strepera:
-                type: number
-              mareca-penelope:
-                type: number
-              anas-platyrhynchos:
-                type: number
-              anas-carolinensis:
-                type: number
-              somateria-mollissima:
-                type: number
-              clangula-hyemalis:
-                type: number
-              bucephala-clangula:
-                type: number
-              mergus-merganser:
-                type: number
-              ortalis-vetula:
-                type: number
-              oreortyx-pictus:
-                type: number
-              colinus-virginianus:
-                type: number
-              callipepla-squamata:
-                type: number
-              callipepla-californica:
-                type: number
-              callipepla-gambelii:
-                type: number
-              francolinus-francolinus:
-                type: number
-              perdix-perdix:
-                type: number
-              gallus-gallus:
-                type: number
-              phasianus-colchicus:
-                type: number
-              centrocercus-urophasianus:
-                type: number
-              lagopus-lagopus:
-                type: number
-              lagopus-muta:
-                type: number
-              lagopus-leucura:
-                type: number
-              dendragapus-fuliginosus:
-                type: number
-              tympanuchus-phasianellus:
-                type: number
-              tympanuchus-cupido:
-                type: number
-              meleagris-gallopavo:
-                type: number
-              tachybaptus-dominicus:
-                type: number
-              podilymbus-podiceps:
-                type: number
-              podiceps-auritus:
-                type: number
-              podiceps-grisegena:
-                type: number
-              podiceps-nigricollis:
-                type: number
-              aechmophorus-occidentalis:
-                type: number
-              columba-livia:
-                type: number
-              patagioenas-flavirostris:
-                type: number
-              patagioenas-fasciata:
-                type: number
-              streptopelia-decaocto:
-                type: number
-              spilopelia-chinensis:
-                type: number
-              geopelia-striata:
-                type: number
-              columbina-inca:
-                type: number
-              columbina-passerina:
-                type: number
-              leptotila-verreauxi:
-                type: number
-              zenaida-asiatica:
-                type: number
-              zenaida-macroura:
-                type: number
-              coccyzus-americanus:
-                type: number
-              coccyzus-erythropthalmus:
-                type: number
-              geococcyx-californianus:
-                type: number
-              crotophaga-sulcirostris:
-                type: number
-              chordeiles-acutipennis:
-                type: number
-              chordeiles-minor:
-                type: number
-              nyctidromus-albicollis:
-                type: number
-              phalaenoptilus-nuttallii:
-                type: number
-              antrostomus-carolinensis:
-                type: number
-              antrostomus-vociferus:
-                type: number
-              antrostomus-arizonae:
-                type: number
-              eugenes-fulgens:
-                type: number
-              lampornis-clemenciae:
-                type: number
-              calypte-anna:
-                type: number
-              selasphorus-platycercus:
-                type: number
-              selasphorus-rufus:
-                type: number
-              amazilia-violiceps:
-                type: number
-              laterallus-jamaicensis:
-                type: number
-              rallus-obsoletus:
-                type: number
-              rallus-elegans:
-                type: number
-              rallus-limicola:
-                type: number
-              porzana-carolina:
-                type: number
-              porphyrio-martinica:
-                type: number
-              gallinula-galeata:
-                type: number
-              fulica-americana:
-                type: number
-              aramus-guarauna:
-                type: number
-              antigone-canadensis:
-                type: number
-              himantopus-mexicanus:
-                type: number
-              recurvirostra-americana:
-                type: number
-              pluvialis-squatarola:
-                type: number
-              pluvialis-dominica:
-                type: number
-              charadrius-semipalmatus:
-                type: number
-              charadrius-vociferus:
-                type: number
-              bartramia-longicauda:
-                type: number
-              numenius-phaeopus:
-                type: number
-              numenius-americanus:
-                type: number
-              limosa-fedoa:
-                type: number
-              arenaria-interpres:
-                type: number
-              calidris-canutus:
-                type: number
-              calidris-himantopus:
-                type: number
-              calidris-alba:
-                type: number
-              calidris-alpina:
-                type: number
-              calidris-maritima:
-                type: number
-              calidris-bairdii:
-                type: number
-              calidris-minutilla:
-                type: number
-              calidris-fuscicollis:
-                type: number
-              calidris-melanotos:
-                type: number
-              calidris-pusilla:
-                type: number
-              limnodromus-scolopaceus:
-                type: number
-              scolopax-minor:
-                type: number
-              gallinago-delicata:
-                type: number
-              actitis-macularius:
-                type: number
-              tringa-solitaria:
-                type: number
-              tringa-flavipes:
-                type: number
-              tringa-semipalmata:
-                type: number
-              tringa-melanoleuca:
-                type: number
-              tringa-glareola:
-                type: number
-              phalaropus-lobatus:
-                type: number
-              phalaropus-fulicarius:
-                type: number
-              stercorarius-parasiticus:
-                type: number
-              stercorarius-longicaudus:
-                type: number
-              uria-aalge:
-                type: number
-              alca-torda:
-                type: number
-              fratercula-arctica:
-                type: number
-              rissa-tridactyla:
-                type: number
-              chroicocephalus-philadelphia:
-                type: number
-              leucophaeus-atricilla:
-                type: number
-              leucophaeus-pipixcan:
-                type: number
-              larus-heermanni:
-                type: number
-              larus-canus:
-                type: number
-              larus-delawarensis:
-                type: number
-              larus-californicus:
-                type: number
-              larus-fuscus:
-                type: number
-              larus-glaucescens:
-                type: number
-              larus-hyperboreus:
-                type: number
-              larus-marinus:
-                type: number
-              gygis-alba:
-                type: number
-              sternula-antillarum:
-                type: number
-              gelochelidon-nilotica:
-                type: number
-              hydroprogne-caspia:
-                type: number
-              chlidonias-niger:
-                type: number
-              sterna-dougallii:
-                type: number
-              sterna-hirundo:
-                type: number
-              sterna-paradisaea:
-                type: number
-              sterna-forsteri:
-                type: number
-              thalasseus-maximus:
-                type: number
-              thalasseus-sandvicensis:
-                type: number
-              thalasseus-elegans:
-                type: number
-              rynchops-niger:
-                type: number
-              gavia-stellata:
-                type: number
-              gavia-arctica:
-                type: number
-              gavia-immer:
-                type: number
-              phoebastria-immutabilis:
-                type: number
-              phoebastria-nigripes:
-                type: number
-              fulmarus-glacialis:
-                type: number
-              puffinus-puffinus:
-                type: number
-              morus-bassanus:
-                type: number
-              phalacrocorax-brasilianus:
-                type: number
-              phalacrocorax-auritus:
-                type: number
-              phalacrocorax-carbo:
-                type: number
-              phalacrocorax-pelagicus:
-                type: number
-              botaurus-lentiginosus:
-                type: number
-              ixobrychus-exilis:
-                type: number
-              ardea-herodias:
-                type: number
-              ardea-alba:
-                type: number
-              bubulcus-ibis:
-                type: number
-              nycticorax-nycticorax:
-                type: number
-              plegadis-chihi:
-                type: number
-              pandion-haliaetus:
-                type: number
-              elanoides-forficatus:
-                type: number
-              aquila-chrysaetos:
-                type: number
-              accipiter-cooperii:
-                type: number
-              accipiter-gentilis:
-                type: number
-              rostrhamus-sociabilis:
-                type: number
-              buteo-plagiatus:
-                type: number
-              buteo-lineatus:
-                type: number
-              buteo-platypterus:
-                type: number
-              buteo-jamaicensis:
-                type: number
-              tyto-furcata:
-                type: number
-              psiloscops-flammeolus:
-                type: number
-              megascops-kennicottii:
-                type: number
-              megascops-asio:
-                type: number
-              megascops-trichopsis:
-                type: number
-              bubo-virginianus:
-                type: number
-              glaucidium-californicum:
-                type: number
-              micrathene-whitneyi:
-                type: number
-              athene-cunicularia:
-                type: number
-              strix-occidentalis:
-                type: number
-              strix-varia:
-                type: number
-              strix-nebulosa:
-                type: number
-              asio-otus:
-                type: number
-              asio-flammeus:
-                type: number
-              aegolius-funereus:
-                type: number
-              aegolius-acadicus:
-                type: number
-              trogon-elegans:
-                type: number
-              megaceryle-torquata:
-                type: number
-              megaceryle-alcyon:
-                type: number
-              chloroceryle-americana:
-                type: number
-              melanerpes-erythrocephalus:
-                type: number
-              melanerpes-formicivorus:
-                type: number
-              melanerpes-uropygialis:
-                type: number
-              melanerpes-carolinus:
-                type: number
-              sphyrapicus-thyroideus:
-                type: number
-              sphyrapicus-varius:
-                type: number
-              sphyrapicus-nuchalis:
-                type: number
-              sphyrapicus-ruber:
-                type: number
-              picoides-dorsalis:
-                type: number
-              picoides-arcticus:
-                type: number
-              dryobates-pubescens:
-                type: number
-              dryobates-scalaris:
-                type: number
-              leuconotopicus-borealis:
-                type: number
-              leuconotopicus-villosus:
-                type: number
-              colaptes-auratus:
-                type: number
-              dryocopus-pileatus:
-                type: number
-              falco-sparverius:
-                type: number
-              falco-columbarius:
-                type: number
-              falco-peregrinus:
-                type: number
-              myiopsitta-monachus:
-                type: number
-              psittacula-krameri:
-                type: number
-              agapornis-roseicollis:
-                type: number
-              camptostoma-imberbe:
-                type: number
-              myiarchus-tuberculifer:
-                type: number
-              myiarchus-cinerascens:
-                type: number
-              myiarchus-crinitus:
-                type: number
-              myiarchus-tyrannulus:
-                type: number
-              pitangus-sulphuratus:
-                type: number
-              myiodynastes-luteiventris:
-                type: number
-              tyrannus-melancholicus:
-                type: number
-              tyrannus-couchii:
-                type: number
-              tyrannus-vociferans:
-                type: number
-              tyrannus-crassirostris:
-                type: number
-              tyrannus-verticalis:
-                type: number
-              tyrannus-tyrannus:
-                type: number
-              tyrannus-dominicensis:
-                type: number
-              tyrannus-forficatus:
-                type: number
-              contopus-cooperi:
-                type: number
-              contopus-pertinax:
-                type: number
-              contopus-sordidulus:
-                type: number
-              contopus-virens:
-                type: number
-              empidonax-flaviventris:
-                type: number
-              empidonax-virescens:
-                type: number
-              empidonax-alnorum:
-                type: number
-              empidonax-traillii:
-                type: number
-              empidonax-minimus:
-                type: number
-              empidonax-hammondii:
-                type: number
-              empidonax-wrightii:
-                type: number
-              empidonax-oberholseri:
-                type: number
-              empidonax-difficilis:
-                type: number
-              empidonax-occidentalis:
-                type: number
-              empidonax-fulvifrons:
-                type: number
-              sayornis-nigricans:
-                type: number
-              sayornis-phoebe:
-                type: number
-              sayornis-saya:
-                type: number
-              pyrocephalus-obscurus:
-                type: number
-              lanius-ludovicianus:
-                type: number
-              vireo-atricapilla:
-                type: number
-              vireo-griseus:
-                type: number
-              vireo-bellii:
-                type: number
-              vireo-vicinior:
-                type: number
-              vireo-huttoni:
-                type: number
-              vireo-flavifrons:
-                type: number
-              vireo-cassinii:
-                type: number
-              vireo-solitarius:
-                type: number
-              vireo-plumbeus:
-                type: number
-              vireo-philadelphicus:
-                type: number
-              vireo-gilvus:
-                type: number
-              vireo-olivaceus:
-                type: number
-              vireo-altiloquus:
-                type: number
-              perisoreus-canadensis:
-                type: number
-              cyanocorax-luxuosus:
-                type: number
-              gymnorhinus-cyanocephalus:
-                type: number
-              cyanocitta-stelleri:
-                type: number
-              cyanocitta-cristata:
-                type: number
-              aphelocoma-californica:
-                type: number
-              aphelocoma-woodhouseii:
-                type: number
-              aphelocoma-wollweberi:
-                type: number
-              nucifraga-columbiana:
-                type: number
-              pica-hudsonia:
-                type: number
-              pica-nuttalli:
-                type: number
-              corvus-brachyrhynchos:
-                type: number
-              corvus-caurinus:
-                type: number
-              corvus-ossifragus:
-                type: number
-              corvus-corax:
-                type: number
-              alauda-arvensis:
-                type: number
-              eremophila-alpestris:
-                type: number
-              progne-subis:
-                type: number
-              tachycineta-bicolor:
-                type: number
-              tachycineta-thalassina:
-                type: number
-              riparia-riparia:
-                type: number
-              petrochelidon-pyrrhonota:
-                type: number
-              petrochelidon-fulva:
-                type: number
-              hirundo-rustica:
-                type: number
-              poecile-carolinensis:
-                type: number
-              poecile-atricapillus:
-                type: number
-              poecile-gambeli:
-                type: number
-              poecile-sclateri:
-                type: number
-              poecile-rufescens:
-                type: number
-              poecile-hudsonicus:
-                type: number
-              baeolophus-wollweberi:
-                type: number
-              baeolophus-inornatus:
-                type: number
-              baeolophus-ridgwayi:
-                type: number
-              baeolophus-bicolor:
-                type: number
-              baeolophus-atricristatus:
-                type: number
-              auriparus-flaviceps:
-                type: number
-              psaltriparus-minimus:
-                type: number
-              sitta-canadensis:
-                type: number
-              sitta-carolinensis:
-                type: number
-              sitta-pygmaea:
-                type: number
-              sitta-pusilla:
-                type: number
-              certhia-americana:
-                type: number
-              salpinctes-obsoletus:
-                type: number
-              catherpes-mexicanus:
-                type: number
-              troglodytes-aedon:
-                type: number
-              troglodytes-pacificus:
-                type: number
-              troglodytes-hiemalis:
-                type: number
-              cistothorus-stellaris:
-                type: number
-              cistothorus-palustris:
-                type: number
-              thryothorus-ludovicianus:
-                type: number
-              thryomanes-bewickii:
-                type: number
-              campylorhynchus-brunneicapillus:
-                type: number
-              polioptila-caerulea:
-                type: number
-              polioptila-californica:
-                type: number
-              polioptila-melanura:
-                type: number
-              pycnonotus-cafer:
-                type: number
-              pycnonotus-jocosus:
-                type: number
-              regulus-satrapa:
-                type: number
-              regulus-calendula:
-                type: number
-              horornis-diphone:
-                type: number
-              phylloscopus-borealis:
-                type: number
-              chamaea-fasciata:
-                type: number
-              zosterops-japonicus:
-                type: number
-              luscinia-svecica:
-                type: number
-              oenanthe-oenanthe:
-                type: number
-              sialia-sialis:
-                type: number
-              myadestes-townsendi:
-                type: number
-              catharus-fuscescens:
-                type: number
-              catharus-minimus:
-                type: number
-              catharus-bicknelli:
-                type: number
-              catharus-ustulatus:
-                type: number
-              catharus-guttatus:
-                type: number
-              hylocichla-mustelina:
-                type: number
-              turdus-migratorius:
-                type: number
-              ixoreus-naevius:
-                type: number
-              dumetella-carolinensis:
-                type: number
-              toxostoma-curvirostre:
-                type: number
-              toxostoma-rufum:
-                type: number
-              toxostoma-longirostre:
-                type: number
-              toxostoma-bendirei:
-                type: number
-              toxostoma-redivivum:
-                type: number
-              toxostoma-lecontei:
-                type: number
-              toxostoma-crissale:
-                type: number
-              oreoscoptes-montanus:
-                type: number
-              mimus-polyglottos:
-                type: number
-              sturnus-vulgaris:
-                type: number
-              acridotheres-tristis:
-                type: number
-              bombycilla-garrulus:
-                type: number
-              bombycilla-cedrorum:
-                type: number
-              phainopepla-nitens:
-                type: number
-              peucedramus-taeniatus:
-                type: number
-              estrilda-astrild:
-                type: number
-              passer-domesticus:
-                type: number
-              passer-montanus:
-                type: number
-              motacilla-tschutschensis:
-                type: number
-              anthus-rubescens:
-                type: number
-              anthus-spragueii:
-                type: number
-              hesperiphona-vespertina:
-                type: number
-              himatione-sanguinea:
-                type: number
-              pinicola-enucleator:
-                type: number
-              haemorhous-mexicanus:
-                type: number
-              haemorhous-purpureus:
-                type: number
-              haemorhous-cassinii:
-                type: number
-              crithagra-mozambica:
-                type: number
               acanthis-flammea:
                 type: number
               acanthis-hornemanni:
                 type: number
-              loxia-curvirostra:
+              acridotheres-tristis:
                 type: number
-              loxia-leucoptera:
+              agelaius-phoeniceus:
                 type: number
-              spinus-pinus:
-                type: number
-              spinus-psaltria:
-                type: number
-              spinus-lawrencei:
-                type: number
-              spinus-tristis:
-                type: number
-              calcarius-lapponicus:
-                type: number
-              calcarius-ornatus:
-                type: number
-              plectrophenax-nivalis:
-                type: number
-              arremonops-rufivirgatus:
-                type: number
-              pipilo-chlorurus:
-                type: number
-              pipilo-maculatus:
-                type: number
-              pipilo-erythrophthalmus:
+              agelaius-tricolor:
                 type: number
               aimophila-ruficeps:
                 type: number
-              melozone-fusca:
-                type: number
-              melozone-crissalis:
-                type: number
-              melozone-aberti:
-                type: number
-              peucaea-carpalis:
-                type: number
-              peucaea-botterii:
-                type: number
-              peucaea-cassinii:
-                type: number
-              peucaea-aestivalis:
-                type: number
-              spizelloides-arborea:
-                type: number
-              spizella-passerina:
-                type: number
-              spizella-pallida:
-                type: number
-              spizella-breweri:
-                type: number
-              spizella-pusilla:
-                type: number
-              spizella-atrogularis:
-                type: number
-              pooecetes-gramineus:
-                type: number
-              chondestes-grammacus:
-                type: number
-              amphispiza-bilineata:
-                type: number
-              artemisiospiza-nevadensis:
-                type: number
-              artemisiospiza-belli:
-                type: number
-              calamospiza-melanocorys:
-                type: number
-              passerculus-sandwichensis:
-                type: number
-              ammodramus-savannarum:
+              alauda-arvensis:
                 type: number
               ammodramus-bairdii:
                 type: number
@@ -913,149 +145,51 @@ components:
                 type: number
               ammodramus-nelsoni:
                 type: number
-              passerella-iliaca:
+              ammodramus-savannarum:
                 type: number
-              melospiza-melodia:
+              amphispiza-bilineata:
                 type: number
-              melospiza-lincolnii:
+              anthus-rubescens:
                 type: number
-              melospiza-georgiana:
+              anthus-spragueii:
                 type: number
-              zonotrichia-albicollis:
+              aphelocoma-californica:
                 type: number
-              zonotrichia-querula:
+              aphelocoma-wollweberi:
                 type: number
-              zonotrichia-leucophrys:
+              aphelocoma-woodhouseii:
                 type: number
-              zonotrichia-atricapilla:
+              arremonops-rufivirgatus:
                 type: number
-              junco-hyemalis:
+              artemisiospiza-belli:
                 type: number
-              junco-phaeonotus:
+              artemisiospiza-nevadensis:
                 type: number
-              icteria-virens:
+              auriparus-flaviceps:
                 type: number
-              xanthocephalus-xanthocephalus:
+              baeolophus-atricristatus:
                 type: number
-              dolichonyx-oryzivorus:
+              baeolophus-bicolor:
                 type: number
-              sturnella-magna:
+              baeolophus-inornatus:
                 type: number
-              sturnella-neglecta:
+              baeolophus-ridgwayi:
                 type: number
-              icterus-spurius:
+              baeolophus-wollweberi:
                 type: number
-              icterus-cucullatus:
+              bombycilla-cedrorum:
                 type: number
-              icterus-bullockii:
+              bombycilla-garrulus:
                 type: number
-              icterus-gularis:
+              calamospiza-melanocorys:
                 type: number
-              icterus-graduacauda:
+              calcarius-lapponicus:
                 type: number
-              icterus-galbula:
+              calcarius-ornatus:
                 type: number
-              icterus-parisorum:
+              camptostoma-imberbe:
                 type: number
-              agelaius-phoeniceus:
-                type: number
-              agelaius-tricolor:
-                type: number
-              molothrus-ater:
-                type: number
-              euphagus-carolinus:
-                type: number
-              euphagus-cyanocephalus:
-                type: number
-              quiscalus-quiscula:
-                type: number
-              quiscalus-major:
-                type: number
-              quiscalus-mexicanus:
-                type: number
-              seiurus-aurocapilla:
-                type: number
-              helmitheros-vermivorum:
-                type: number
-              parkesia-motacilla:
-                type: number
-              parkesia-noveboracensis:
-                type: number
-              vermivora-chrysoptera:
-                type: number
-              vermivora-cyanoptera:
-                type: number
-              mniotilta-varia:
-                type: number
-              protonotaria-citrea:
-                type: number
-              limnothlypis-swainsonii:
-                type: number
-              leiothlypis-peregrina:
-                type: number
-              leiothlypis-celata:
-                type: number
-              leiothlypis-luciae:
-                type: number
-              leiothlypis-ruficapilla:
-                type: number
-              leiothlypis-virginiae:
-                type: number
-              oporornis-agilis:
-                type: number
-              geothlypis-tolmiei:
-                type: number
-              geothlypis-philadelphia:
-                type: number
-              geothlypis-formosa:
-                type: number
-              geothlypis-trichas:
-                type: number
-              setophaga-citrina:
-                type: number
-              setophaga-ruticilla:
-                type: number
-              setophaga-kirtlandii:
-                type: number
-              setophaga-tigrina:
-                type: number
-              setophaga-cerulea:
-                type: number
-              setophaga-americana:
-                type: number
-              setophaga-magnolia:
-                type: number
-              setophaga-castanea:
-                type: number
-              setophaga-fusca:
-                type: number
-              setophaga-aestiva:
-                type: number
-              setophaga-pensylvanica:
-                type: number
-              setophaga-striata:
-                type: number
-              setophaga-caerulescens:
-                type: number
-              setophaga-palmarum:
-                type: number
-              setophaga-pinus:
-                type: number
-              setophaga-coronata:
-                type: number
-              setophaga-dominica:
-                type: number
-              setophaga-discolor:
-                type: number
-              setophaga-graciae:
-                type: number
-              setophaga-nigrescens:
-                type: number
-              setophaga-townsendi:
-                type: number
-              setophaga-occidentalis:
-                type: number
-              setophaga-virens:
+              campylorhynchus-brunneicapillus:
                 type: number
               cardellina-canadensis:
                 type: number
@@ -1063,47 +197,930 @@ components:
                 type: number
               cardellina-rubrifrons:
                 type: number
-              myioborus-pictus:
-                type: number
-              piranga-hepatica:
-                type: number
-              piranga-rubra:
-                type: number
-              piranga-olivacea:
-                type: number
-              piranga-ludoviciana:
-                type: number
               cardinalis-cardinalis:
                 type: number
               cardinalis-sinuatus:
                 type: number
-              pheucticus-ludovicianus:
+              catharus-bicknelli:
                 type: number
-              pheucticus-melanocephalus:
+              catharus-fuscescens:
+                type: number
+              catharus-guttatus:
+                type: number
+              catharus-minimus:
+                type: number
+              catharus-ustulatus:
+                type: number
+              catherpes-mexicanus:
+                type: number
+              certhia-americana:
+                type: number
+              chamaea-fasciata:
+                type: number
+              chondestes-grammacus:
+                type: number
+              cistothorus-palustris:
+                type: number
+              cistothorus-stellaris:
+                type: number
+              contopus-cooperi:
+                type: number
+              contopus-pertinax:
+                type: number
+              contopus-sordidulus:
+                type: number
+              contopus-virens:
+                type: number
+              corvus-brachyrhynchos:
+                type: number
+              corvus-caurinus:
+                type: number
+              corvus-corax:
+                type: number
+              corvus-ossifragus:
+                type: number
+              crithagra-mozambica:
+                type: number
+              cyanocitta-cristata:
+                type: number
+              cyanocitta-stelleri:
+                type: number
+              cyanocorax-luxuosus:
+                type: number
+              dolichonyx-oryzivorus:
+                type: number
+              dumetella-carolinensis:
+                type: number
+              empidonax-alnorum:
+                type: number
+              empidonax-difficilis:
+                type: number
+              empidonax-flaviventris:
+                type: number
+              empidonax-fulvifrons:
+                type: number
+              empidonax-hammondii:
+                type: number
+              empidonax-minimus:
+                type: number
+              empidonax-oberholseri:
+                type: number
+              empidonax-occidentalis:
+                type: number
+              empidonax-traillii:
+                type: number
+              empidonax-virescens:
+                type: number
+              empidonax-wrightii:
+                type: number
+              eremophila-alpestris:
+                type: number
+              estrilda-astrild:
+                type: number
+              euphagus-carolinus:
+                type: number
+              euphagus-cyanocephalus:
+                type: number
+              geothlypis-formosa:
+                type: number
+              geothlypis-philadelphia:
+                type: number
+              geothlypis-tolmiei:
+                type: number
+              geothlypis-trichas:
+                type: number
+              gymnorhinus-cyanocephalus:
+                type: number
+              haemorhous-cassinii:
+                type: number
+              haemorhous-mexicanus:
+                type: number
+              haemorhous-purpureus:
+                type: number
+              helmitheros-vermivorum:
+                type: number
+              hesperiphona-vespertina:
+                type: number
+              himatione-sanguinea:
+                type: number
+              hirundo-rustica:
+                type: number
+              horornis-diphone:
+                type: number
+              hylocichla-mustelina:
+                type: number
+              icteria-virens:
+                type: number
+              icterus-bullockii:
+                type: number
+              icterus-cucullatus:
+                type: number
+              icterus-galbula:
+                type: number
+              icterus-graduacauda:
+                type: number
+              icterus-gularis:
+                type: number
+              icterus-parisorum:
+                type: number
+              icterus-spurius:
+                type: number
+              ixoreus-naevius:
+                type: number
+              junco-hyemalis:
+                type: number
+              junco-phaeonotus:
+                type: number
+              lanius-ludovicianus:
+                type: number
+              leiothlypis-celata:
+                type: number
+              leiothlypis-luciae:
+                type: number
+              leiothlypis-peregrina:
+                type: number
+              leiothlypis-ruficapilla:
+                type: number
+              leiothlypis-virginiae:
+                type: number
+              limnothlypis-swainsonii:
+                type: number
+              loxia-curvirostra:
+                type: number
+              loxia-leucoptera:
+                type: number
+              luscinia-svecica:
+                type: number
+              melospiza-georgiana:
+                type: number
+              melospiza-lincolnii:
+                type: number
+              melospiza-melodia:
+                type: number
+              melozone-aberti:
+                type: number
+              melozone-crissalis:
+                type: number
+              melozone-fusca:
+                type: number
+              mimus-polyglottos:
+                type: number
+              mniotilta-varia:
+                type: number
+              molothrus-ater:
+                type: number
+              motacilla-tschutschensis:
+                type: number
+              myadestes-townsendi:
+                type: number
+              myiarchus-cinerascens:
+                type: number
+              myiarchus-crinitus:
+                type: number
+              myiarchus-tuberculifer:
+                type: number
+              myiarchus-tyrannulus:
+                type: number
+              myioborus-pictus:
+                type: number
+              myiodynastes-luteiventris:
+                type: number
+              nucifraga-columbiana:
+                type: number
+              oenanthe-oenanthe:
+                type: number
+              oporornis-agilis:
+                type: number
+              oreoscoptes-montanus:
+                type: number
+              parkesia-motacilla:
+                type: number
+              parkesia-noveboracensis:
+                type: number
+              paroaria-coronata:
+                type: number
+              passer-domesticus:
+                type: number
+              passer-montanus:
+                type: number
+              passerculus-sandwichensis:
+                type: number
+              passerina-amoena:
                 type: number
               passerina-caerulea:
                 type: number
-              passerina-amoena:
+              passerina-ciris:
                 type: number
               passerina-cyanea:
                 type: number
               passerina-versicolor:
                 type: number
-              passerina-ciris:
+              perisoreus-canadensis:
                 type: number
-              spiza-americana:
+              petrochelidon-fulva:
                 type: number
-              paroaria-coronata:
+              petrochelidon-pyrrhonota:
+                type: number
+              peucaea-aestivalis:
+                type: number
+              peucaea-botterii:
+                type: number
+              peucaea-carpalis:
+                type: number
+              peucaea-cassinii:
+                type: number
+              peucedramus-taeniatus:
+                type: number
+              phainopepla-nitens:
+                type: number
+              pheucticus-ludovicianus:
+                type: number
+              pheucticus-melanocephalus:
+                type: number
+              phylloscopus-borealis:
+                type: number
+              pica-hudsonia:
+                type: number
+              pica-nuttalli:
+                type: number
+              pinicola-enucleator:
+                type: number
+              pipilo-chlorurus:
+                type: number
+              pipilo-erythrophthalmus:
+                type: number
+              pipilo-maculatus:
+                type: number
+              piranga-ludoviciana:
+                type: number
+              piranga-olivacea:
+                type: number
+              piranga-rubra:
+                type: number
+              pitangus-sulphuratus:
+                type: number
+              plectrophenax-nivalis:
+                type: number
+              poecile-atricapillus:
+                type: number
+              poecile-carolinensis:
+                type: number
+              poecile-gambeli:
+                type: number
+              poecile-hudsonicus:
+                type: number
+              poecile-rufescens:
+                type: number
+              poecile-sclateri:
+                type: number
+              polioptila-caerulea:
+                type: number
+              polioptila-californica:
+                type: number
+              polioptila-melanura:
+                type: number
+              pooecetes-gramineus:
+                type: number
+              progne-subis:
+                type: number
+              protonotaria-citrea:
+                type: number
+              psaltriparus-minimus:
+                type: number
+              pycnonotus-cafer:
+                type: number
+              pycnonotus-jocosus:
+                type: number
+              pyrocephalus-obscurus:
+                type: number
+              quiscalus-major:
+                type: number
+              quiscalus-mexicanus:
+                type: number
+              quiscalus-quiscula:
+                type: number
+              regulus-calendula:
+                type: number
+              regulus-satrapa:
+                type: number
+              riparia-riparia:
+                type: number
+              salpinctes-obsoletus:
+                type: number
+              sayornis-nigricans:
+                type: number
+              sayornis-phoebe:
+                type: number
+              sayornis-saya:
+                type: number
+              seiurus-aurocapilla:
+                type: number
+              setophaga-aestiva:
+                type: number
+              setophaga-americana:
+                type: number
+              setophaga-caerulescens:
+                type: number
+              setophaga-castanea:
+                type: number
+              setophaga-cerulea:
+                type: number
+              setophaga-citrina:
+                type: number
+              setophaga-discolor:
+                type: number
+              setophaga-dominica:
+                type: number
+              setophaga-fusca:
+                type: number
+              setophaga-graciae:
+                type: number
+              setophaga-kirtlandii:
+                type: number
+              setophaga-magnolia:
+                type: number
+              setophaga-nigrescens:
+                type: number
+              setophaga-occidentalis:
+                type: number
+              setophaga-palmarum:
+                type: number
+              setophaga-pensylvanica:
+                type: number
+              setophaga-pinus:
+                type: number
+              setophaga-ruticilla:
+                type: number
+              setophaga-striata:
+                type: number
+              setophaga-tigrina:
+                type: number
+              setophaga-townsendi:
+                type: number
+              setophaga-virens:
+                type: number
+              sialia-sialis:
                 type: number
               sicalis-flaveola:
                 type: number
-              passerella-unalaschcensis:
+              sitta-canadensis:
                 type: number
-              passerella-schistacea:
+              sitta-carolinensis:
                 type: number
-              passerella-megarhyncha:
+              sitta-pusilla:
                 type: number
-              setophaga-auduboni:
+              sitta-pygmaea:
+                type: number
+              spinus-lawrencei:
+                type: number
+              spinus-pinus:
+                type: number
+              spinus-psaltria:
+                type: number
+              spinus-tristis:
+                type: number
+              spiza-americana:
+                type: number
+              spizella-atrogularis:
+                type: number
+              spizella-breweri:
+                type: number
+              spizella-pallida:
+                type: number
+              spizella-passerina:
+                type: number
+              spizella-pusilla:
+                type: number
+              spizelloides-arborea:
+                type: number
+              sturnella-magna:
+                type: number
+              sturnella-neglecta:
+                type: number
+              sturnus-vulgaris:
+                type: number
+              tachycineta-bicolor:
+                type: number
+              tachycineta-thalassina:
+                type: number
+              thryomanes-bewickii:
+                type: number
+              thryothorus-ludovicianus:
+                type: number
+              toxostoma-bendirei:
+                type: number
+              toxostoma-crissale:
+                type: number
+              toxostoma-curvirostre:
+                type: number
+              toxostoma-lecontei:
+                type: number
+              toxostoma-longirostre:
+                type: number
+              toxostoma-redivivum:
+                type: number
+              toxostoma-rufum:
+                type: number
+              troglodytes-aedon:
+                type: number
+              troglodytes-hiemalis:
+                type: number
+              troglodytes-pacificus:
+                type: number
+              turdus-migratorius:
+                type: number
+              tyrannus-couchii:
+                type: number
+              tyrannus-crassirostris:
+                type: number
+              tyrannus-dominicensis:
+                type: number
+              tyrannus-forficatus:
+                type: number
+              tyrannus-melancholicus:
+                type: number
+              tyrannus-tyrannus:
+                type: number
+              tyrannus-verticalis:
+                type: number
+              tyrannus-vociferans:
+                type: number
+              vermivora-chrysoptera:
+                type: number
+              vermivora-cyanoptera:
+                type: number
+              vireo-altiloquus:
+                type: number
+              vireo-atricapilla:
+                type: number
+              vireo-bellii:
+                type: number
+              vireo-cassinii:
+                type: number
+              vireo-flavifrons:
+                type: number
+              vireo-gilvus:
+                type: number
+              vireo-griseus:
+                type: number
+              vireo-huttoni:
+                type: number
+              vireo-olivaceus:
+                type: number
+              vireo-philadelphicus:
+                type: number
+              vireo-plumbeus:
+                type: number
+              vireo-solitarius:
+                type: number
+              vireo-vicinior:
+                type: number
+              xanthocephalus-xanthocephalus:
+                type: number
+              zonotrichia-albicollis:
+                type: number
+              zonotrichia-atricapilla:
+                type: number
+              zonotrichia-leucophrys:
+                type: number
+              zonotrichia-querula:
+                type: number
+              zosterops-japonicus:
+                type: number
+    NonPasserinesDetections:
+      type: object
+      properties:
+        predictions:
+          description: An array of objects containing species as a key and the score as a value
+          type: array
+          items:
+            type: object
+            properties:
+              accipiter-cooperii:
+                type: number
+              accipiter-gentilis:
+                type: number
+              actitis-macularius:
+                type: number
+              aechmophorus-occidentalis:
+                type: number
+              aegolius-acadicus:
+                type: number
+              aegolius-funereus:
+                type: number
+              agapornis-roseicollis:
+                type: number
+              aix-sponsa:
+                type: number
+              alca-torda:
+                type: number
+              alopochen-aegyptiaca:
+                type: number
+              amazilia-violiceps:
+                type: number
+              anas-platyrhynchos:
+                type: number
+              anser-albifrons:
+                type: number
+              anser-caerulescens:
+                type: number
+              antigone-canadensis:
+                type: number
+              antrostomus-arizonae:
+                type: number
+              antrostomus-carolinensis:
+                type: number
+              antrostomus-vociferus:
+                type: number
+              aquila-chrysaetos:
+                type: number
+              aramus-guarauna:
+                type: number
+              ardea-alba:
+                type: number
+              ardea-herodias:
+                type: number
+              arenaria-interpres:
+                type: number
+              asio-flammeus:
+                type: number
+              asio-otus:
+                type: number
+              athene-cunicularia:
+                type: number
+              bartramia-longicauda:
+                type: number
+              botaurus-lentiginosus:
+                type: number
+              branta-bernicla:
+                type: number
+              branta-canadensis:
+                type: number
+              branta-hutchinsii:
+                type: number
+              bubo-virginianus:
+                type: number
+              bubulcus-ibis:
+                type: number
+              bucephala-clangula:
+                type: number
+              buteo-jamaicensis:
+                type: number
+              buteo-lineatus:
+                type: number
+              buteo-plagiatus:
+                type: number
+              buteo-platypterus:
+                type: number
+              calidris-alba:
+                type: number
+              calidris-alpina:
+                type: number
+              calidris-bairdii:
+                type: number
+              calidris-canutus:
+                type: number
+              calidris-fuscicollis:
+                type: number
+              calidris-himantopus:
+                type: number
+              calidris-maritima:
+                type: number
+              calidris-melanotos:
+                type: number
+              calidris-minutilla:
+                type: number
+              calidris-pusilla:
+                type: number
+              callipepla-californica:
+                type: number
+              callipepla-gambelii:
+                type: number
+              callipepla-squamata:
+                type: number
+              calypte-anna:
+                type: number
+              centrocercus-urophasianus:
+                type: number
+              charadrius-semipalmatus:
+                type: number
+              charadrius-vociferus:
+                type: number
+              chlidonias-niger:
+                type: number
+              chloroceryle-americana:
+                type: number
+              chordeiles-acutipennis:
+                type: number
+              chordeiles-minor:
+                type: number
+              chroicocephalus-philadelphia:
+                type: number
+              clangula-hyemalis:
+                type: number
+              coccyzus-americanus:
+                type: number
+              coccyzus-erythropthalmus:
+                type: number
+              colaptes-auratus:
+                type: number
+              colinus-virginianus:
+                type: number
+              columba-livia:
+                type: number
+              columbina-inca:
+                type: number
+              columbina-passerina:
+                type: number
+              crotophaga-sulcirostris:
+                type: number
+              cygnus-buccinator:
+                type: number
+              cygnus-columbianus:
+                type: number
+              cygnus-olor:
+                type: number
+              dendragapus-fuliginosus:
+                type: number
+              dendrocygna-autumnalis:
+                type: number
+              dryobates-pubescens:
+                type: number
+              dryobates-scalaris:
+                type: number
+              dryocopus-pileatus:
+                type: number
+              elanoides-forficatus:
+                type: number
+              eugenes-fulgens:
+                type: number
+              falco-columbarius:
+                type: number
+              falco-peregrinus:
+                type: number
+              falco-sparverius:
+                type: number
+              francolinus-francolinus:
+                type: number
+              fratercula-arctica:
+                type: number
+              fulica-americana:
+                type: number
+              fulmarus-glacialis:
+                type: number
+              gallinago-delicata:
+                type: number
+              gallinula-galeata:
+                type: number
+              gallus-gallus:
+                type: number
+              gavia-arctica:
+                type: number
+              gavia-immer:
+                type: number
+              gavia-stellata:
+                type: number
+              gelochelidon-nilotica:
+                type: number
+              geococcyx-californianus:
+                type: number
+              geopelia-striata:
+                type: number
+              gygis-alba:
+                type: number
+              himantopus-mexicanus:
+                type: number
+              hydroprogne-caspia:
+                type: number
+              ixobrychus-exilis:
+                type: number
+              lagopus-lagopus:
+                type: number
+              lagopus-leucura:
+                type: number
+              lagopus-muta:
+                type: number
+              lampornis-clemenciae:
+                type: number
+              larus-californicus:
+                type: number
+              larus-canus:
+                type: number
+              larus-delawarensis:
+                type: number
+              larus-fuscus:
+                type: number
+              larus-glaucescens:
+                type: number
+              larus-heermanni:
+                type: number
+              larus-hyperboreus:
+                type: number
+              larus-marinus:
+                type: number
+              laterallus-jamaicensis:
+                type: number
+              leptotila-verreauxi:
+                type: number
+              leuconotopicus-borealis:
+                type: number
+              leuconotopicus-villosus:
+                type: number
+              leucophaeus-atricilla:
+                type: number
+              leucophaeus-pipixcan:
+                type: number
+              limnodromus-scolopaceus:
+                type: number
+              limosa-fedoa:
+                type: number
+              mareca-penelope:
+                type: number
+              mareca-strepera:
+                type: number
+              megaceryle-alcyon:
+                type: number
+              megaceryle-torquata:
+                type: number
+              megascops-asio:
+                type: number
+              megascops-kennicottii:
+                type: number
+              megascops-trichopsis:
+                type: number
+              melanerpes-carolinus:
+                type: number
+              melanerpes-erythrocephalus:
+                type: number
+              melanerpes-formicivorus:
+                type: number
+              melanerpes-uropygialis:
+                type: number
+              meleagris-gallopavo:
+                type: number
+              mergus-merganser:
+                type: number
+              micrathene-whitneyi:
+                type: number
+              morus-bassanus:
+                type: number
+              myiopsitta-monachus:
+                type: number
+              numenius-americanus:
+                type: number
+              numenius-phaeopus:
+                type: number
+              nycticorax-nycticorax:
+                type: number
+              nyctidromus-albicollis:
+                type: number
+              oreortyx-pictus:
+                type: number
+              ortalis-vetula:
+                type: number
+              pandion-haliaetus:
+                type: number
+              patagioenas-fasciata:
+                type: number
+              patagioenas-flavirostris:
+                type: number
+              perdix-perdix:
+                type: number
+              phalacrocorax-auritus:
+                type: number
+              phalacrocorax-brasilianus:
+                type: number
+              phalacrocorax-carbo:
+                type: number
+              phalacrocorax-pelagicus:
+                type: number
+              phalaenoptilus-nuttallii:
+                type: number
+              phalaropus-fulicarius:
+                type: number
+              phalaropus-lobatus:
+                type: number
+              phasianus-colchicus:
+                type: number
+              phoebastria-immutabilis:
+                type: number
+              phoebastria-nigripes:
+                type: number
+              picoides-arcticus:
+                type: number
+              picoides-dorsalis:
+                type: number
+              plegadis-chihi:
+                type: number
+              pluvialis-dominica:
+                type: number
+              pluvialis-squatarola:
+                type: number
+              podiceps-auritus:
+                type: number
+              podiceps-grisegena:
+                type: number
+              podiceps-nigricollis:
+                type: number
+              podilymbus-podiceps:
+                type: number
+              porphyrio-martinica:
+                type: number
+              porzana-carolina:
+                type: number
+              psiloscops-flammeolus:
+                type: number
+              psittacula-krameri:
+                type: number
+              puffinus-puffinus:
+                type: number
+              rallus-elegans:
+                type: number
+              rallus-limicola:
+                type: number
+              rallus-obsoletus:
+                type: number
+              recurvirostra-americana:
+                type: number
+              rissa-tridactyla:
+                type: number
+              rostrhamus-sociabilis:
+                type: number
+              rynchops-niger:
+                type: number
+              scolopax-minor:
+                type: number
+              selasphorus-platycercus:
+                type: number
+              selasphorus-rufus:
+                type: number
+              somateria-mollissima:
+                type: number
+              spatula-clypeata:
+                type: number
+              spatula-discors:
+                type: number
+              sphyrapicus-nuchalis:
+                type: number
+              sphyrapicus-ruber:
+                type: number
+              sphyrapicus-thyroideus:
+                type: number
+              sphyrapicus-varius:
+                type: number
+              spilopelia-chinensis:
+                type: number
+              stercorarius-longicaudus:
+                type: number
+              stercorarius-parasiticus:
+                type: number
+              sterna-dougallii:
+                type: number
+              sterna-forsteri:
+                type: number
+              sterna-hirundo:
+                type: number
+              sterna-paradisaea:
+                type: number
+              sternula-antillarum:
+                type: number
+              streptopelia-decaocto:
+                type: number
+              strix-nebulosa:
+                type: number
+              strix-occidentalis:
+                type: number
+              strix-varia:
+                type: number
+              tachybaptus-dominicus:
+                type: number
+              thalasseus-elegans:
+                type: number
+              thalasseus-maximus:
+                type: number
+              thalasseus-sandvicensis:
+                type: number
+              tringa-flavipes:
+                type: number
+              tringa-glareola:
+                type: number
+              tringa-melanoleuca:
+                type: number
+              tringa-semipalmata:
+                type: number
+              tringa-solitaria:
+                type: number
+              trogon-elegans:
+                type: number
+              tympanuchus-cupido:
+                type: number
+              tympanuchus-phasianellus:
+                type: number
+              uria-aalge:
+                type: number
+              zenaida-asiatica:
+                type: number
+              zenaida-macroura:
                 type: number
     Spectrogram:
       type: object
