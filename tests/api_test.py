@@ -23,66 +23,53 @@ def four_channel_audio():
 
 
 @pytest.fixture
-def detect_passerines_api_url():
-    return "http://localhost:8081/v1/birds/detect/passerines"
+def detect_cardinalis_cardinalis_api_url():
+    return "http://localhost:8081/v1/birds/detect/cardinalis-cardinalis"
 
 
-@pytest.fixture
-def detect_nonpasserines_api_url():
-    return "http://localhost:8081/v1/birds/detect/non_passerines"
-
-
-@pytest.fixture
-def spectrogram_api_url():
-    return "http://localhost:8081/v1/birds/spectrogram"
-
-
-def test_post_with_no_data_errors(detect_passerines_api_url):
-    req = requests.post(detect_passerines_api_url)
+def test_post_with_no_data_errors(detect_cardinalis_cardinalis_api_url):
+    req = requests.post(detect_cardinalis_cardinalis_api_url)
     assert req.json() == {"error": "No data was given with post?"}
 
 
-def test_post_with_junk_data_errors(detect_passerines_api_url):
-    req = requests.post(detect_passerines_api_url, data=b"helloworld")
+def test_post_with_junk_data_errors(detect_cardinalis_cardinalis_api_url):
+    req = requests.post(detect_cardinalis_cardinalis_api_url, data=b"helloworld")
     assert req.json() == {"error": "I could not load the audio"}
 
 
-def test_detect_passerines_cardinalis(basic_wav_file, detect_passerines_api_url):
-    req = requests.post(detect_passerines_api_url, data=basic_wav_file)
+def test_detect_passerines_cardinalis(
+    basic_wav_file, detect_cardinalis_cardinalis_api_url
+):
+    req = requests.post(detect_cardinalis_cardinalis_api_url, data=basic_wav_file)
     assert req.json()["predictions"][0]["cardinalis-cardinalis"] == 0.01388
 
 
-def test_detect_nonpasserines(basic_wav_file, detect_nonpasserines_api_url):
-    req = requests.post(detect_nonpasserines_api_url, data=basic_wav_file)
-    assert req.json()["predictions"][0]["larus-marinus"] == 0.0
-
-
-def test_four_channel_fails(four_channel_audio, detect_passerines_api_url):
-    req = requests.post(detect_passerines_api_url, data=four_channel_audio)
+def test_four_channel_fails(four_channel_audio, detect_cardinalis_cardinalis_api_url):
+    req = requests.post(detect_cardinalis_cardinalis_api_url, data=four_channel_audio)
     assert req.json() == {"error": "Audio has more than one channel, ignoring"}
 
 
-def test_dual_channel_fails(dual_channel_audio, detect_passerines_api_url):
-    req = requests.post(detect_passerines_api_url, data=dual_channel_audio)
+def test_dual_channel_fails(dual_channel_audio, detect_cardinalis_cardinalis_api_url):
+    req = requests.post(detect_cardinalis_cardinalis_api_url, data=dual_channel_audio)
     assert req.json() == {"error": "Audio has more than one channel, ignoring"}
 
 
-def test_spectrogram_dimensions(basic_wav_file, spectrogram_api_url):
-    req = requests.post(spectrogram_api_url, data=basic_wav_file)
-    assert len(req.json()["images"]) == 1
-    assert len(req.json()["images"][0]) == 299
-    assert len(req.json()["images"][0][0]) == 299
-    assert len(req.json()["images"][0][0][0]) == 3
-    with pytest.raises(TypeError) as info:
-        len(req.json()["images"][0][0][0][0])
-    assert "object of type 'float' has no len()" in str(info.value)
+# def test_spectrogram_dimensions(basic_wav_file, spectrogram_api_url):
+#     req = requests.post(spectrogram_api_url, data=basic_wav_file)
+#     assert len(req.json()["images"]) == 1
+#     assert len(req.json()["images"][0]) == 299
+#     assert len(req.json()["images"][0][0]) == 299
+#     assert len(req.json()["images"][0][0][0]) == 3
+#     with pytest.raises(TypeError) as info:
+#         len(req.json()["images"][0][0][0][0])
+#     assert "object of type 'float' has no len()" in str(info.value)
 
 
-def test_detect_status_code_200(basic_wav_file, detect_passerines_api_url):
-    req = requests.post(detect_passerines_api_url, data=basic_wav_file)
+def test_detect_status_code_200(basic_wav_file, detect_cardinalis_cardinalis_api_url):
+    req = requests.post(detect_cardinalis_cardinalis_api_url, data=basic_wav_file)
     assert req.status_code == 200
 
 
-def test_spectrogram_status_code_200(basic_wav_file, spectrogram_api_url):
-    req = requests.post(spectrogram_api_url, data=basic_wav_file)
-    assert req.status_code == 200
+# def test_spectrogram_status_code_200(basic_wav_file, spectrogram_api_url):
+#     req = requests.post(spectrogram_api_url, data=basic_wav_file)
+#     assert req.status_code == 200

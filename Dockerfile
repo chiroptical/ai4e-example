@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/aiforearth/base-py:latest as ai4e_base
 
 # Use any compatible Ubuntu-based image as your selected base image.
-FROM nvidia/cuda:10.1-runtime-ubuntu18.04
+FROM nvidia/cuda:11.0-runtime-ubuntu20.04
 
 # Get the API tools and add environment variables
 COPY --from=ai4e_base /ai4e_api_tools /ai4e_api_tools
@@ -10,8 +10,8 @@ ENV PATH /usr/local/envs/ai4e_py_api/bin:$PATH
 ENV PYTHONPATH="${PYTHONPATH}:/ai4e_api_tools"
 
 # Install necessary packages
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     build-essential \
     python3-dev \
     python3-pip \
@@ -27,8 +27,6 @@ RUN apt-get update && \
     libsm6 \
     libxrender1 \
     git \
-    mercurial \
-    subversion \
     libpcre3-dev \
     libsndfile1 \
     ffmpeg \
@@ -37,20 +35,14 @@ RUN apt-get update && \
 
 # Install the Python packages needed
 RUN pip3 install --no-cache-dir \
-  tensorflow-gpu==1.14.0 \
-  pandas \
-  scipy \
-  scikit-image \
-  librosa \
-  soundfile \
+  opensoundscape==0.4.4 \
   flask \
-  uwsgi \
   flask-restful \
-  azure \
+  # azure \
   azure-storage-blob \
   applicationinsights \
   grpcio \
-  opencensus==0.6.0 \
+  opencensus \
   opencensus-ext-requests \
   opencensus-ext-azure \
   uwsgi
@@ -69,24 +61,19 @@ RUN chmod +x /startup.sh
 COPY ./birds /app/birds
 
 # Copy the models
-COPY ./models/model_passerines.h5 /app/birds
-COPY ./models/model_nonpasserines.h5 /app/birds
-
-# Copy the species metadata
-COPY ./models/species_passerines.csv /app/birds
-COPY ./models/species_nonpasserines.csv /app/birds
+ COPY ./models/cardinalis-cardinalis-2020-09-12-epoch-200.tar /app/birds
 
 # Application Insights keys and trace configuration
 ENV APPINSIGHTS_INSTRUMENTATIONKEY= \
     TRACE_SAMPLING_RATE=1.0
 
 # The following variables will allow you to filter logs in AppInsights
-ENV SERVICE_OWNER=AI4E_Tensorflow_Birds \
+ENV SERVICE_OWNER=AI4E_PyTorch_Birds \
     SERVICE_CLUSTER=Local\ Docker \
-    SERVICE_MODEL_NAME=AI4E_Tensorflow_Birds \
+    SERVICE_MODEL_NAME=AI4E_PyTorch_Birds \
     SERVICE_MODEL_FRAMEWORK=Python \
-    SERVICE_MODEL_FRAMEOWRK_VERSION=3.6.8 \
-    SERVICE_MODEL_FRAMEWORK_VERSION=3.6.8 \
+    SERVICE_MODEL_FRAMEOWRK_VERSION=3.8.2 \
+    SERVICE_MODEL_FRAMEWORK_VERSION=3.8.2 \
     SERVICE_MODEL_VERSION=1.0
 
 ENV API_PREFIX=/v1/birds
