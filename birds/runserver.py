@@ -16,6 +16,9 @@ print("Creating Application")
 ACCEPTED_CONTENT_TYPES = ["audio/vnd.wav"]
 
 app = Flask(__name__)
+# Maximum content length can be 1 mb
+MAX_CONTENT_LENGTH = 1 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 
 # Use the AI4EAppInsights library to send log messages.
 log = AI4EAppInsights()
@@ -39,8 +42,7 @@ model.load_state_dict(opensoundscape_tar["model_state_dict"])
 # loads data or files into a dictionary for access in your API function. We
 # pass this function as a parameter to your API setup.
 def process_request_data(req):
-    """ Wrap input data into BytesIO object
-    """
+    """Wrap input data into BytesIO object"""
     try:
         return_values = {"audio_io": None}
         if req.data != b"":
@@ -53,18 +55,18 @@ def process_request_data(req):
 def process_audio(func_name, audio_io):
     """
     Check inputs and return spectrogram images
-    
+
     Check that inputs are in correct format (single-channel,
     between 5-20 seconds), and convert to images
-    
+
     Args:
         func_name (str): name of calling function (for printing)
-        audio_io (bytes): 
-    
+        audio_io (bytes):
+
     Returns:
-        array of 299x299 images, each representing up to 
+        array of 299x299 images, each representing up to
             5s of the original audio
-    
+
     """
     print(f"runserver.py: {func_name}() checking inputs")
     # Just return error if no data was posted
@@ -110,12 +112,11 @@ def process_audio(func_name, audio_io):
     request_processing_function=process_request_data,
     maximum_concurrent_requests=5,
     content_types=ACCEPTED_CONTENT_TYPES,
-    content_max_length=10000,
+    content_max_length=MAX_CONTENT_LENGTH,
     trace_name="post:detect_cardinalis_cardinalis",
 )
 def detect(*args, **kwargs):
-    """ Return predictions
-    """
+    """Return predictions"""
     detect_str = "detect(cardinalis_cardinalis)"
 
     print(f"runserver.py: {detect_str} called")
@@ -130,11 +131,7 @@ def detect(*args, **kwargs):
     print(f"runserver.py: {detect_str} predict")
     # Generation predictions from model
     dataset = birds_detector.BasicDataset(images)
-    dataloader = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=1,
-        shuffle=False
-    )
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
     scores = []
     model.eval()
     for batch in dataloader:
@@ -153,12 +150,11 @@ def detect(*args, **kwargs):
     request_processing_function=process_request_data,
     maximum_concurrent_requests=5,
     content_types=ACCEPTED_CONTENT_TYPES,
-    content_max_length=10000,
+    content_max_length=MAX_CONTENT_LENGTH,
     trace_name="post:spectrogram",
 )
 def spect(*args, **kwargs):
-    """ Return spectrogram
-    """
+    """Return spectrogram"""
 
     print("runserver.py: spect() called")
     audio_io = kwargs.get("audio_io")

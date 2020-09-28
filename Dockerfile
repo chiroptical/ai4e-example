@@ -58,7 +58,9 @@ COPY ./startup.sh /
 RUN chmod +x /startup.sh
 
 # Copy your API code
-COPY ./birds /app/birds
+RUN mkdir -p /app/birds
+COPY ./birds/runserver.py /app/birds/runserver.py
+COPY ./birds/birds_detector.py /app/birds/birds_detector.py
 
 # Copy the models
  COPY ./models/cardinalis-cardinalis-2020-09-12-epoch-200.tar /app/birds
