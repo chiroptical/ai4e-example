@@ -32,7 +32,7 @@ class BasicDataset(torch.utils.data.Dataset):
         self.mean = torch.tensor([0.5 for _ in range(3)])
         self.stddev = torch.tensor([0.5 for _ in range(3)])
         self.transform = transforms.Compose(
-            transforms.ToTensor(), transforms.Normalize(self.mean, self.stddev)
+            [transforms.ToTensor(), transforms.Normalize(self.mean, self.stddev)]
         )
 
     def __len__(self):

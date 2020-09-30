@@ -2,3 +2,4 @@
 __pycache__/
 .ipynb_checkpoints/
 models/cardinalis-cardinalis-2020-09-12-epoch-200.tar
+.vim/

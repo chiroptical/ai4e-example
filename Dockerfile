@@ -1,13 +1,9 @@
 # Pull in the AI for Earth Base Image, so we can extract necessary libraries.
-FROM mcr.microsoft.com/aiforearth/base-py:latest as ai4e_base
+# - Decided to pull these tools in to third_party/ai4e_api_tools
+# FROM mcr.microsoft.com/aiforearth/base-py:latest as ai4e_base
 
 # Use any compatible Ubuntu-based image as your selected base image.
 FROM nvidia/cuda:11.0-runtime-ubuntu20.04
-
-# Get the API tools and add environment variables
-COPY --from=ai4e_base /ai4e_api_tools /ai4e_api_tools
-ENV PATH /usr/local/envs/ai4e_py_api/bin:$PATH
-ENV PYTHONPATH="${PYTHONPATH}:/ai4e_api_tools"
 
 # Install necessary packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -56,6 +52,12 @@ COPY ./supervisord.conf /etc/supervisord.conf
 # startup.sh is a helper script
 COPY ./startup.sh /
 RUN chmod +x /startup.sh
+
+# Get the API tools and add environment variables
+#COPY --from=ai4e_base /ai4e_api_tools /ai4e_api_tools
+ADD ./third_party/ai4e_api_tools /ai4e_api_tools
+ENV PATH /usr/local/envs/ai4e_py_api/bin:$PATH
+ENV PYTHONPATH="${PYTHONPATH}:/ai4e_api_tools"
 
 # Copy your API code
 RUN mkdir -p /app/birds

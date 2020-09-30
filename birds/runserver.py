@@ -9,6 +9,7 @@ import numpy as np
 import torch
 import torchvision
 from opensoundscape.audio import Audio
+from opensoundscape.spectrogram import Spectrogram
 import birds_detector
 
 print("Creating Application")
@@ -81,7 +82,9 @@ def process_audio(func_name, audio_io):
         )
     except:
         return {"error": "I could not load the audio"}
-    print(f"runserver.py: {func_name}() loaded samples at sample_rate {sample_rate}")
+    print(
+        f"runserver.py: {func_name}() loaded samples at sample_rate {audio.sample_rate}"
+    )
 
     # Check for single- or dual-channel
     if len(audio.samples.shape) > 1:
@@ -138,7 +141,7 @@ def detect(*args, **kwargs):
         X = batch["X"]
         predictions = model(X)
         for x in torch.nn.functional.softmax(predictions, 1).detach().cpu().numpy():
-            scores.append(x)
+            scores.append(x.tolist())
 
     print(f"runserver.py: {detect_str} return predictions")
     return {"predictions": scores}

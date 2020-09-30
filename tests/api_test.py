@@ -46,8 +46,7 @@ def test_detect_passerines_cardinalis(
         data=basic_wav_file,
         headers={"Content-type": "audio/vnd.wav"},
     )
-    print(req.text)
-    assert False
+    assert req.json()["predictions"][0][1] > 0.99
 
 
 # def test_four_channel_fails(four_channel_audio, detect_cardinalis_cardinalis_api_url):
