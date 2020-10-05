@@ -65,7 +65,12 @@ COPY ./birds/runserver.py /app/birds/runserver.py
 COPY ./birds/birds_detector.py /app/birds/birds_detector.py
 
 # Copy the models
- COPY ./models/cardinalis-cardinalis-2020-09-12-epoch-200.tar /app/birds
+COPY ./models/cardinalis-cardinalis-2020-09-12-epoch-200.tar /app/birds
+COPY ./models/haemorhous-mexicanus-2020-09-12-epoch-200.tar /app/birds
+COPY ./models/melospiza-melodia-2020-09-12-epoch-200.tar /app/birds
+COPY ./models/thryothorus-ludovicianus-2020-09-12-epoch-200.tar /app/birds
+COPY ./models/turdus-migratorius-2020-09-12-epoch-200.tar /app/birds
+COPY ./models/zenaida-macroura-2020-09-12-epoch-200.tar /app/birds
 
 # Application Insights keys and trace configuration
 ENV APPINSIGHTS_INSTRUMENTATIONKEY= \

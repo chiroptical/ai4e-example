@@ -29,15 +29,27 @@ log = AI4EAppInsights()
 with app.app_context():
     ai4e_service = APIService(app, log)
 
-# Load the model
-# The model was copied to this location when the container was built; see ../Dockerfile
-num_classes = 2
-opensoundscape_tar = torch.load(
-    "/app/birds/cardinalis-cardinalis-2020-09-12-epoch-200.tar"
-)
-model = torchvision.models.resnet18(pretrained=False)
-model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
-model.load_state_dict(opensoundscape_tar["model_state_dict"])
+endpoint_model_dict = {
+    "cardinalis_cardinalis": "cardinalis-cardinalis-2020-09-12-epoch-200.tar",
+    "haemorhous_mexicanus": "haemorhous-mexicanus-2020-09-12-epoch-200.tar",
+    "melospiza_melodia": "melospiza-melodia-2020-09-12-epoch-200.tar",
+    "thryothorus_ludovicianus": "thryothorus-ludovicianus-2020-09-12-epoch-200.tar",
+    "turdus_migratorius": "turdus-migratorius-2020-09-12-epoch-200.tar",
+    "zenaida_macroura": "zenaida-macroura-2020-09-12-epoch-200.tar",
+}
+
+
+def load_model(endpoint):
+    num_classes = 2
+    model = torchvision.models.resnet18(pretrained=False)
+    model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
+
+    tar = torch.load(f"/app/birds/{endpoint_model_dict[endpoint]}")
+
+    model.load_state_dict(tar["model_state_dict"])
+
+    return model
+
 
 # Define a function for processing request data, if applicable. This function
 # loads data or files into a dictionary for access in your API function. We
@@ -115,8 +127,10 @@ def process_audio(func_name, audio_io):
     trace_name="post:detect_cardinalis_cardinalis",
 )
 def detect(*args, **kwargs):
+    endpoint = "cardinalis_cardinalis"
+
     """Return predictions"""
-    detect_str = "detect(cardinalis_cardinalis)"
+    detect_str = f"detect({endpoint})"
 
     print(f"runserver.py: {detect_str} called")
     audio_io = kwargs.get("audio_io")
@@ -126,6 +140,229 @@ def detect(*args, **kwargs):
     if "error" in load_output.keys():
         return load_output
     images = load_output["images"]
+
+    print(f"runserver.py: {detect_str} load_model")
+    model = load_model(endpoint)
+
+    print(f"runserver.py: {detect_str} predict")
+    # Generation predictions from model
+    dataset = birds_detector.BasicDataset(images)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    scores = []
+    model.eval()
+    for batch in dataloader:
+        X = batch["X"]
+        predictions = model(X)
+        for x in torch.nn.functional.softmax(predictions, 1).detach().cpu().numpy():
+            scores.append(x.tolist())
+
+    print(f"runserver.py: {detect_str} return predictions")
+    return {"predictions": scores}
+
+
+# POST, async API endpoint example
+@ai4e_service.api_sync_func(
+    api_path="/detect/haemorhous_mexicanus",
+    methods=["POST"],
+    request_processing_function=process_request_data,
+    maximum_concurrent_requests=5,
+    content_types=ACCEPTED_CONTENT_TYPES,
+    content_max_length=MAX_CONTENT_LENGTH,
+    trace_name="post:detect_haemorhous_mexicanus",
+)
+def detect(*args, **kwargs):
+    endpoint = "haemorhous_mexicanus"
+
+    """Return predictions"""
+    detect_str = f"detect({endpoint})"
+
+    print(f"runserver.py: {detect_str} called")
+    audio_io = kwargs.get("audio_io")
+
+    load_output = process_audio(func_name=f"{detect_str}", audio_io=audio_io)
+
+    if "error" in load_output.keys():
+        return load_output
+    images = load_output["images"]
+
+    print(f"runserver.py: {detect_str} load_model")
+    model = load_model(endpoint)
+
+    print(f"runserver.py: {detect_str} predict")
+    # Generation predictions from model
+    dataset = birds_detector.BasicDataset(images)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    scores = []
+    model.eval()
+    for batch in dataloader:
+        X = batch["X"]
+        predictions = model(X)
+        for x in torch.nn.functional.softmax(predictions, 1).detach().cpu().numpy():
+            scores.append(x.tolist())
+
+    print(f"runserver.py: {detect_str} return predictions")
+    return {"predictions": scores}
+
+
+# POST, async API endpoint example
+@ai4e_service.api_sync_func(
+    api_path="/detect/melospiza_melodia",
+    methods=["POST"],
+    request_processing_function=process_request_data,
+    maximum_concurrent_requests=5,
+    content_types=ACCEPTED_CONTENT_TYPES,
+    content_max_length=MAX_CONTENT_LENGTH,
+    trace_name="post:detect_melospiza_melodia",
+)
+def detect(*args, **kwargs):
+    endpoint = "melospiza_melodia"
+
+    """Return predictions"""
+    detect_str = f"detect({endpoint})"
+
+    print(f"runserver.py: {detect_str} called")
+    audio_io = kwargs.get("audio_io")
+
+    load_output = process_audio(func_name=f"{detect_str}", audio_io=audio_io)
+
+    if "error" in load_output.keys():
+        return load_output
+    images = load_output["images"]
+
+    print(f"runserver.py: {detect_str} load_model")
+    model = load_model(endpoint)
+
+    print(f"runserver.py: {detect_str} predict")
+    # Generation predictions from model
+    dataset = birds_detector.BasicDataset(images)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    scores = []
+    model.eval()
+    for batch in dataloader:
+        X = batch["X"]
+        predictions = model(X)
+        for x in torch.nn.functional.softmax(predictions, 1).detach().cpu().numpy():
+            scores.append(x.tolist())
+
+    print(f"runserver.py: {detect_str} return predictions")
+    return {"predictions": scores}
+
+
+# POST, async API endpoint example
+@ai4e_service.api_sync_func(
+    api_path="/detect/thryothorus_ludovicianus",
+    methods=["POST"],
+    request_processing_function=process_request_data,
+    maximum_concurrent_requests=5,
+    content_types=ACCEPTED_CONTENT_TYPES,
+    content_max_length=MAX_CONTENT_LENGTH,
+    trace_name="post:detect_thryothorus_ludovicianus",
+)
+def detect(*args, **kwargs):
+    endpoint = "thryothorus_ludovicianus"
+
+    """Return predictions"""
+    detect_str = f"detect({endpoint})"
+
+    print(f"runserver.py: {detect_str} called")
+    audio_io = kwargs.get("audio_io")
+
+    load_output = process_audio(func_name=f"{detect_str}", audio_io=audio_io)
+
+    if "error" in load_output.keys():
+        return load_output
+    images = load_output["images"]
+
+    print(f"runserver.py: {detect_str} load_model")
+    model = load_model(endpoint)
+
+    print(f"runserver.py: {detect_str} predict")
+    # Generation predictions from model
+    dataset = birds_detector.BasicDataset(images)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    scores = []
+    model.eval()
+    for batch in dataloader:
+        X = batch["X"]
+        predictions = model(X)
+        for x in torch.nn.functional.softmax(predictions, 1).detach().cpu().numpy():
+            scores.append(x.tolist())
+
+    print(f"runserver.py: {detect_str} return predictions")
+    return {"predictions": scores}
+
+
+# POST, async API endpoint example
+@ai4e_service.api_sync_func(
+    api_path="/detect/turdus_migratorius",
+    methods=["POST"],
+    request_processing_function=process_request_data,
+    maximum_concurrent_requests=5,
+    content_types=ACCEPTED_CONTENT_TYPES,
+    content_max_length=MAX_CONTENT_LENGTH,
+    trace_name="post:detect_turdus_migratorius",
+)
+def detect(*args, **kwargs):
+    endpoint = "turdus_migratorius"
+
+    """Return predictions"""
+    detect_str = f"detect({endpoint})"
+
+    print(f"runserver.py: {detect_str} called")
+    audio_io = kwargs.get("audio_io")
+
+    load_output = process_audio(func_name=f"{detect_str}", audio_io=audio_io)
+
+    if "error" in load_output.keys():
+        return load_output
+    images = load_output["images"]
+
+    print(f"runserver.py: {detect_str} load_model")
+    model = load_model(endpoint)
+
+    print(f"runserver.py: {detect_str} predict")
+    # Generation predictions from model
+    dataset = birds_detector.BasicDataset(images)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    scores = []
+    model.eval()
+    for batch in dataloader:
+        X = batch["X"]
+        predictions = model(X)
+        for x in torch.nn.functional.softmax(predictions, 1).detach().cpu().numpy():
+            scores.append(x.tolist())
+
+    print(f"runserver.py: {detect_str} return predictions")
+    return {"predictions": scores}
+
+
+# POST, async API endpoint example
+@ai4e_service.api_sync_func(
+    api_path="/detect/zenaida_macroura",
+    methods=["POST"],
+    request_processing_function=process_request_data,
+    maximum_concurrent_requests=5,
+    content_types=ACCEPTED_CONTENT_TYPES,
+    content_max_length=MAX_CONTENT_LENGTH,
+    trace_name="post:detect_zenaida_macroura",
+)
+def detect(*args, **kwargs):
+    endpoint = "zenaida_macroura"
+
+    """Return predictions"""
+    detect_str = f"detect({endpoint})"
+
+    print(f"runserver.py: {detect_str} called")
+    audio_io = kwargs.get("audio_io")
+
+    load_output = process_audio(func_name=f"{detect_str}", audio_io=audio_io)
+
+    if "error" in load_output.keys():
+        return load_output
+    images = load_output["images"]
+
+    print(f"runserver.py: {detect_str} load_model")
+    model = load_model(endpoint)
 
     print(f"runserver.py: {detect_str} predict")
     # Generation predictions from model
