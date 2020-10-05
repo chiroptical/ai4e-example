@@ -17,8 +17,8 @@ print("Creating Application")
 ACCEPTED_CONTENT_TYPES = ["audio/vnd.wav"]
 
 app = Flask(__name__)
-# Maximum content length can be 1 mb
-MAX_CONTENT_LENGTH = 1 * 1024 * 1024
+# Maximum content length can be 5 mb
+MAX_CONTENT_LENGTH = 5 * 1024 * 1024
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 
 # Use the AI4EAppInsights library to send log messages.
@@ -81,14 +81,10 @@ def process_audio(func_name, audio_io):
             audio_io, sample_rate=22050, resample_type="kaiser_fast"
         )
     except:
-        return {"error": "I could not load the audio"}
+        return {"error": "Unable to load audio, multi-chennel input is ignored"}
     print(
         f"runserver.py: {func_name}() loaded samples at sample_rate {audio.sample_rate}"
     )
-
-    # Check for single- or dual-channel
-    if len(audio.samples.shape) > 1:
-        return {"error": "Audio has more than one channel, ignoring"}
 
     # Check the duration is between 5 and 20 seconds
     duration = audio.duration()
@@ -167,6 +163,9 @@ def spect(*args, **kwargs):
     if "error" in load_output.keys():
         return load_output
     images = load_output["images"]
+
+    # `images` is [Image], need regular Python lists for JSON serialization
+    images = [np.array(x).tolist() for x in images]
 
     print("runserver.py: spect(), return spectrogram(s)")
     return {"images": images}
