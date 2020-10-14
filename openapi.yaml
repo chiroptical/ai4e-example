@@ -54,6 +54,122 @@ paths:
                   - $ref: "#/components/schemas/Detection"
                   - $ref: "#/components/schemas/Error"
       x-codegen-request-body-name: body
+  /detect/haemorhous_mexicanus:
+    post:
+      tags:
+      - detect_haemorhous_mexicanus
+      summary: Make prediction on audio for haemorhous-mexicanus
+      operationId: predictHaemorhousMexicanus
+      requestBody:
+        description: A wav file greater >= 5 s and <= 20 s
+        content:
+          audio/vnd.wav:
+            schema:
+              type: string
+              format: bytes
+        required: true
+      responses:
+        200:
+          description: JSON document
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Detection"
+                  - $ref: "#/components/schemas/Error"
+  /detect/melospiza_melodia:
+    post:
+      tags:
+      - detect_melospiza_melodia
+      summary: Make prediction on audio for melospiza_melodia
+      operationId: predictMelospizaMelodia
+      requestBody:
+        description: A wav file greater >= 5 s and <= 20 s
+        content:
+          audio/vnd.wav:
+            schema:
+              type: string
+              format: bytes
+        required: true
+      responses:
+        200:
+          description: JSON document
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Detection"
+                  - $ref: "#/components/schemas/Error"
+  /detect/thryothorus_ludovicianus:
+    post:
+      tags:
+      - detect_thryothorus_ludovicianus
+      summary: Make prediction on audio for thryothorus-ludovicianus
+      operationId: predictThryothorusLudovicianus
+      requestBody:
+        description: A wav file greater >= 5 s and <= 20 s
+        content:
+          audio/vnd.wav:
+            schema:
+              type: string
+              format: bytes
+        required: true
+      responses:
+        200:
+          description: JSON document
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Detection"
+                  - $ref: "#/components/schemas/Error"
+  /detect/turdus_migratorius:
+    post:
+      tags:
+      - detect_turdus_migratorius
+      summary: Make prediction on audio for turdus_migratorius
+      operationId: predictTurdusMigratorius
+      requestBody:
+        description: A wav file greater >= 5 s and <= 20 s
+        content:
+          audio/vnd.wav:
+            schema:
+              type: string
+              format: bytes
+        required: true
+      responses:
+        200:
+          description: JSON document
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Detection"
+                  - $ref: "#/components/schemas/Error"
+  /detect/zenaida_macroura:
+    post:
+      tags:
+      - detect_zenaida_macroura
+      summary: Make prediction on audio for zenaida-macroura
+      operationId: predictZenaidaMacroura
+      requestBody:
+        description: A wav file greater >= 5 s and <= 20 s
+        content:
+          audio/vnd.wav:
+            schema:
+              type: string
+              format: bytes
+        required: true
+      responses:
+        200:
+          description: JSON document
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Detection"
+                  - $ref: "#/components/schemas/Error"
+      x-codegen-request-body-name: body 
   /spectrogram:
     post:
       tags:
